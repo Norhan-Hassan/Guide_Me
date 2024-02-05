@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <Folder Include="DTO\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>
