@@ -11,8 +11,9 @@ namespace Guide_Me.Models
         }
         public DbSet<Place> Places { get; set; }
         public DbSet<City> Cities { get; set; }
+        public DbSet<PlaceMedia> placeMedias { get; set; }
 
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure your entity mappings here
