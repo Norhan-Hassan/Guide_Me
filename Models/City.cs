@@ -7,6 +7,6 @@
         public string CityName { get; set; }
 
 
-        public ICollection<Place> Places { get; set; } = new List<Place>();
+        public  virtual ICollection<Place> Places { get; set; } 
     }
 }
