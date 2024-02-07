@@ -6,6 +6,7 @@ namespace Guide_Me.Models
 {
     public class PlaceMedia
     {
+        [Key]
         public int Id { get; set; }
         public string MediaType { get; set; }
         public string MediaContent { get; set; }

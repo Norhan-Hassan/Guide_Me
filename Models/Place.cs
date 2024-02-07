@@ -1,13 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Guide_Me.Models
 {
     public class Place
     {
+        [Key]
         public int Id { get; set; }
 
+        [Required]
         public string PlaceName { get; set; }
-
+        [Required]
         public string Category { get; set; }
 
         [ForeignKey("City")]
