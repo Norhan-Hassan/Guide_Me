@@ -1,5 +1,6 @@
 
 using Guide_Me.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Guide_Me
 {
@@ -15,8 +16,7 @@ namespace Guide_Me
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.services.AddDbContext<ApplicationDbContext>(options =>
-               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<ApplicationDbContext>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

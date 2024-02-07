@@ -1,4 +1,7 @@
-﻿namespace Guide_Me.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+
+namespace Guide_Me.Models
 {
     public class ApplicationDbContext : DbContext
     {
@@ -9,6 +12,14 @@
         public DbSet<Place> Places { get; set; }
         public DbSet<City> Cities { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data source = .; Initial catalog = Guide_Me; integrated security = true");
+            optionsBuilder.LogTo(log => Debug.WriteLine(log));
+            //optionsBuilder.UseLazyLoadingProxies(true);
+
+            base.OnConfiguring(optionsBuilder);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure your entity mappings here
@@ -20,6 +31,7 @@
                 .HasOne(p => p.City)
                 .WithMany(c => c.Places)
                 .HasForeignKey(p => p.CityId);
+            base.OnModelCreating(modelBuilder);
         }
 
     }
