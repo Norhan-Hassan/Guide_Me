@@ -1,6 +1,7 @@
 
 using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
 namespace Guide_Me
