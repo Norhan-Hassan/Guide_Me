@@ -1,4 +1,6 @@
-﻿namespace Guide_Me.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Guide_Me.Models
 {
     public class Place
     {
@@ -8,6 +10,7 @@
 
         public string Category { get; set; }
 
+        [ForeignKey("City")]
         public int  CityId { get; set; }
 
         public virtual City City { get; set; }

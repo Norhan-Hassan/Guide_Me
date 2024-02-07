@@ -1,4 +1,8 @@
-﻿namespace Guide_Me.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Guide_Me.Models
 {
     public class PlaceMedia
     {
@@ -6,6 +10,7 @@
         public string MediaType { get; set; }
         public string MediaContent { get; set; }
 
+        [ForeignKey("PlaceMedia")]
         public int PlaceId { get; set; }
 
         public virtual ICollection<PlaceMedia> PlaceMedias { get; set; }
