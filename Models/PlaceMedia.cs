@@ -12,7 +12,6 @@ namespace Guide_Me.Models
 
         [ForeignKey("PlaceMedia")]
         public int PlaceId { get; set; }
-
-        public virtual ICollection<PlaceMedia> PlaceMedias { get; set; }
+        public virtual Place Place { get; set; }
     }
 }
