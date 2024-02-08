@@ -1,5 +1,6 @@
 
 using Guide_Me.Models;
+using Guide_Me.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,8 @@ namespace Guide_Me
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddScoped<ICityService, CityService>();
+            builder.Services.AddScoped<IPlaceService, PlaceService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
