@@ -13,6 +13,10 @@ namespace Guide_Me.Models
         public DbSet<City> Cities { get; set; }
         public DbSet<PlaceMedia> placeMedias { get; set; }
 
+        public DbSet<PlaceItem> placeItem { get; set; }
+
+        public DbSet<PlaceItemMedia> placeItemMedias { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,8 +36,15 @@ namespace Guide_Me.Models
                 .WithOne(placemedia=> placemedia.Place)
                 .HasForeignKey(pm => pm.PlaceId);
 
+            modelBuilder.Entity<Place>()
+                .HasMany(p => p.PlaceItems)
+                .WithOne(placeItem => placeItem.place)
+                .HasForeignKey(placeItem => placeItem.placeID);
 
-
+            modelBuilder.Entity<PlaceItem>()
+                .HasMany(p => p.PlaceItemMedias)
+                .WithOne(placeItemMedia=>placeItemMedia.placeItem)
+                .HasForeignKey(placeItemMedia=>placeItemMedia.placeItemID);
 
             base.OnModelCreating(modelBuilder);
         }

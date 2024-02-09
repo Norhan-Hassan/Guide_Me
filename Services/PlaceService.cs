@@ -10,11 +10,11 @@ namespace Guide_Me.Services
         public PlaceService(ApplicationDbContext context) {
             _context = context;
         }
-       public List<PlaceDto> GetPlaces(string cityName) {
+        public List<PlaceDto> GetPlaces(string cityName) {
             
             var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
             if (city == null)
-            {
+            {    
                 
                 return null;
             }
@@ -44,10 +44,8 @@ namespace Guide_Me.Services
                 placeDtos.Add(placeDto);
             }
             return placeDtos;
-        
+        }
+      
 
-
-
-    }
     }
 }

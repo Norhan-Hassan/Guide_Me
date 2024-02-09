@@ -18,6 +18,7 @@ namespace Guide_Me.Models
 
         public virtual City City { get; set; }
         public virtual ICollection<PlaceMedia> PlaceMedias { get; set; }
+        public virtual ICollection<PlaceItem> PlaceItems { get; set; }
 
     }
 }

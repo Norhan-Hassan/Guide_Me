@@ -3,6 +3,7 @@ using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Guide_Me.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240209153814_placeitem")]
+    partial class placeitem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,7 +86,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeID");
 
-                    b.ToTable("placeItem");
+                    b.ToTable("PlaceItem");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItemMedia", b =>
@@ -109,7 +112,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeItemID");
 
-                    b.ToTable("placeItemMedias");
+                    b.ToTable("PlaceItemMedia");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceMedia", b =>
