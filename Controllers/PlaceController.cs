@@ -26,5 +26,16 @@ namespace Guide_Me.Controllers
 
             return Ok(places);
         }
+        [HttpGet("{placeName}/places/items")]
+        public IActionResult GetItemsByPlace(string placeName)
+        {
+            var placeItems = _placeService.GetPlaceItems(placeName);
+            if (placeItems == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(placeItems);
+        }
     }
 }
