@@ -13,36 +13,26 @@ namespace Guide_Me.Services
             _context = context;
         }
 
-        public Dictionary<PlaceDto, List<PlaceItemDto>> GetPlaceItems(string placeName)
+        public List<PlaceItemDto> GetPlaceItems(string placeName)
         {
             var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
-            var placeItemsMap = new Dictionary<PlaceDto, List<PlaceItemDto>>();
+            var placeItemsMap = new List<PlaceItemDto>();
 
             if (place != null)
             {
-                var placeItems = _context.placeItem
-                    .Include(pi => pi.PlaceItemMedias)
-                    .Where(pi => pi.place.PlaceName == place.PlaceName)
+  
+                var placeItems=_context.placeItem
+                    .Where(pi => pi.placeID==place.Id)
                     .ToList();
 
                 foreach (var placeItem in placeItems)
                 {
-                    PlaceDto placeDto = new PlaceDto
-                    {
-                        Name = place.PlaceName,
-                        Category = place.Category,
-                        Media = place.PlaceMedias != null
-                                ? place.PlaceMedias.Select(m => new PlaceMediaDto
-                                {
-                                    MediaContent = m.MediaContent
-                                }).ToList()
-                                : new List<PlaceMediaDto>()
-                    };
-
-                    if (!placeItemsMap.ContainsKey(placeDto))
-                    {
-                        placeItemsMap.Add(placeDto, new List<PlaceItemDto>());
-                    }
+                    PlaceWithoutMediaDto placeDto = new PlaceWithoutMediaDto
+                        {
+                            Name = place.PlaceName,
+                            Category = place.Category,
+                      
+                        };
 
                     var placeItemDto = new PlaceItemDto
                     {
@@ -58,7 +48,7 @@ namespace Guide_Me.Services
 
                     };
 
-                    placeItemsMap[placeDto].Add(placeItemDto);
+                    placeItemsMap.Add(placeItemDto);
                 }
             }
 
