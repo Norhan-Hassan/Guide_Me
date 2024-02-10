@@ -1,4 +1,6 @@
-﻿namespace Guide_Me.DTO
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace Guide_Me.DTO
 {
     public class ItemMediaDto
     {

@@ -35,7 +35,7 @@ namespace Guide_Me.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cities");
+                    b.ToTable("Cities", (string)null);
                 });
 
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
@@ -61,7 +61,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.ToTable("Places");
+                    b.ToTable("Places", (string)null);
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItem", b =>
@@ -83,7 +83,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeID");
 
-                    b.ToTable("placeItem");
+                    b.ToTable("placeItem", (string)null);
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItemMedia", b =>
@@ -109,7 +109,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeItemID");
 
-                    b.ToTable("placeItemMedias");
+                    b.ToTable("placeItemMedias", (string)null);
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceMedia", b =>
@@ -135,7 +135,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("PlaceId");
 
-                    b.ToTable("placeMedias");
+                    b.ToTable("placeMedias", (string)null);
                 });
 
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
