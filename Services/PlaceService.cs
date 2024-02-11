@@ -3,14 +3,18 @@ using Guide_Me.Migrations;
 using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
+using System.Linq;
+using System.Web;
 
 namespace Guide_Me.Services
 {
     public class PlaceService: IPlaceService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApplicationDbContext _context;
-        public PlaceService(ApplicationDbContext context) {
+        public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public List<PlaceItemDto> GetPlaceItems(string placeName)
@@ -56,24 +60,21 @@ namespace Guide_Me.Services
         }
 
 
-        public List<PlaceDto> GetPlaces(string cityName) {
-            
+        public List<PlaceDto> GetPlaces(string cityName)
+        {
             var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
             if (city == null)
-            {    
-                
+            {
                 return null;
             }
 
             var places = _context.Places
-                     .Include(p => p.PlaceMedias) 
-                     .Where(p => p.CityId == city.Id)
-                     .ToList();
-
+                         .Include(p => p.PlaceMedias)
+                         .Where(p => p.CityId == city.Id)
+                         .ToList();
 
             List<PlaceDto> placeDtos = new List<PlaceDto>();
 
-            
             foreach (var place in places)
             {
                 PlaceDto placeDto = new PlaceDto
@@ -81,17 +82,27 @@ namespace Guide_Me.Services
                     Name = place.PlaceName,
                     Category = place.Category,
                     Media = place.PlaceMedias != null
-                    ? place.PlaceMedias.Select(m => new PlaceMediaDto
+                        ? place.PlaceMedias.Select(m => new PlaceMediaDto
                         {
-                            MediaContent = m.MediaContent
+                            MediaContentUrl = GetMediaUrl(m.MediaContent) // Construct full URL here
                         }).ToList()
-                    : new List<PlaceMediaDto>()
+                        : new List<PlaceMediaDto>()
                 };
                 placeDtos.Add(placeDto);
             }
             return placeDtos;
         }
-      
+
+        private string GetMediaUrl(string mediaContent)
+        {
+            // Remove any leading or trailing single quotes
+            mediaContent = mediaContent.Trim('\'');
+
+            // Construct the URL relative to the application's base URL
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            return $"{baseUrl}/{mediaContent}";
+        }
 
     }
 }

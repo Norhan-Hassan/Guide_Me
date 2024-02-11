@@ -24,6 +24,7 @@ namespace Guide_Me
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<ICityService, CityService>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
+            builder.Services.AddHttpContextAccessor();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -32,6 +33,7 @@ namespace Guide_Me
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
