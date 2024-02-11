@@ -26,6 +26,7 @@ namespace Guide_Me.Services
             {
   
                 var placeItems=_context.placeItem
+                    .Include(p => p.PlaceItemMedias)
                     .Where(pi => pi.placeID==place.Id)
                     .ToList();
 
@@ -45,7 +46,8 @@ namespace Guide_Me.Services
                          Media =placeItem.PlaceItemMedias != null?
                          placeItem.PlaceItemMedias.Select(media=>new ItemMediaDto
                          {
-                             MediaContent=media.MediaContent
+                             MediaContent=media.MediaContent,
+                             MediaType=media.MediaType,
                          })
                          .ToList() 
                          : new List<ItemMediaDto>()

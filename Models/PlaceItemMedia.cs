@@ -8,7 +8,7 @@ namespace Guide_Me.Models
         [Key]
         public  int ID { get; set; }
         public  string MediaType { get; set; }
-        public string MediaContent{ get; set; }
+        public string MediaContent { get; set; }
 
         [ForeignKey("placeItem")]
         public int placeItemID { get; set; }
