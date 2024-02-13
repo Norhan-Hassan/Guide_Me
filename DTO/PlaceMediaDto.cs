@@ -2,7 +2,8 @@
 {
     public class PlaceMediaDto
     {
-        //public string MediaContent { get; set; }
-        public string MediaContentUrl { get; set; }
+        public string MediaType { get; set; }
+       
+        public string MediaContent { get; set; }
     }
 }

@@ -62,9 +62,9 @@ namespace Guide_Me.Services
         }
 
 
-        public List<PlaceDto> GetPlaces(string cityName)
+        public List<PlaceDto> GetPlaces(string CityName)
         {
-            var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
+            var city = _context.Cities.FirstOrDefault(c => c.CityName == CityName);
             if (city == null)
             {
                 return null;
@@ -86,7 +86,8 @@ namespace Guide_Me.Services
                     Media = place.PlaceMedias != null
                         ? place.PlaceMedias.Select(m => new PlaceMediaDto
                         {
-                            MediaContentUrl = GetMediaUrl(m.MediaContent) // Construct full URL here
+                            MediaType = m.MediaType,
+                            MediaContent = m.MediaType.ToLower() == "text" ? m.MediaContent : GetMediaUrl(m.MediaContent)
                         }).ToList()
                         : new List<PlaceMediaDto>()
                 };
@@ -97,14 +98,16 @@ namespace Guide_Me.Services
 
         private string GetMediaUrl(string mediaContent)
         {
-            // Remove any leading or trailing single quotes
-            mediaContent = mediaContent.Trim('\'');
-
-            // Construct the URL relative to the application's base URL
+            
             var request = _httpContextAccessor.HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
             return $"{baseUrl}/{mediaContent}";
         }
+
+
+
+
+
 
     }
 }
