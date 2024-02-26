@@ -15,10 +15,10 @@ namespace Guide_Me.Controllers
             _placeService = placeService;
         }
 
-        [HttpGet("{cityName}/places")]
-        public IActionResult GetPlacesByCity(string cityName)
+        [HttpGet("{CityName}/Allplaces")]
+        public IActionResult GetPlacesByCity(string CityName)
         {
-            var places = _placeService.GetPlaces(cityName);
+            var places = _placeService.GetPlaces(CityName);
             if (places == null)
             {
                 return NotFound(); 

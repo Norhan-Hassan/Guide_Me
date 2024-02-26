@@ -9,6 +9,8 @@ namespace Guide_Me.Models
         [Required]
         public string CityName { get; set; }
 
+        public string CityImage { get; set; }
+
         public  virtual ICollection<Place> Places { get; set; } 
     }
 }

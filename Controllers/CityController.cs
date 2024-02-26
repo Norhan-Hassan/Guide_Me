@@ -16,10 +16,23 @@ namespace Guide_Me.Controllers
         }
 
         [HttpGet]
+        [Route("AllCities")]
         public IActionResult GetAllCities()
         {
             var cities = _cityService.GetAllCities();
             return Ok(cities);
         }
+        [HttpGet]
+        [Route("SearchCity/{cityName}")]
+        public IActionResult SearchCity(string cityName)
+        {
+            var city = _cityService.GetAllCities().FirstOrDefault(c => c.Name.ToLower() == cityName.ToLower());
+            if (city != null)
+            {
+                return Ok(city);
+            }
+            return NotFound($"City with name '{cityName}' not found.");
+        }
     }
 }
+
