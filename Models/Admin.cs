@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Guide_Me.Models
 {
-    public class Admin
+    public class Admin: ApplicationUser
     {
         [Key]
         public int ID { get; set; }

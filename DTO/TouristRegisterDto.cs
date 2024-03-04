@@ -1,23 +1,21 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Guide_Me.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 
-namespace Guide_Me.Models
+namespace Guide_Me.DTO
 {
-    public class Tourist:ApplicationUser
+    public class TouristRegisterDto
     {
-        [Key]
-        public int ID { get; set; }
         [Required]
         public string userName { get; set; }
         [Required]
         public string password { get; set; }
 
-        [Compare("Password")]
+        [Compare("password")]
         public string ConfirmPassword { get; set; }
         [Required]
         public string email { get; set; }
         [Required]
         public string language { get; set; }
+
     }
 }

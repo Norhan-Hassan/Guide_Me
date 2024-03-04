@@ -4,6 +4,7 @@ using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Guide_Me.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240304015222_authenticationTables")]
+    partial class authenticationTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,7 +108,7 @@ namespace Guide_Me.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
@@ -131,7 +134,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.ToTable("Places", (string)null);
+                    b.ToTable("Places");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItem", b =>
@@ -153,7 +156,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeID");
 
-                    b.ToTable("placeItem", (string)null);
+                    b.ToTable("placeItem");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItemMedia", b =>
@@ -179,7 +182,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("placeItemID");
 
-                    b.ToTable("placeItemMedias", (string)null);
+                    b.ToTable("placeItemMedias");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceMedia", b =>
@@ -205,7 +208,7 @@ namespace Guide_Me.Migrations
 
                     b.HasIndex("PlaceId");
 
-                    b.ToTable("placeMedias", (string)null);
+                    b.ToTable("placeMedias");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
