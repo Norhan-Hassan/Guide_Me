@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\Video\**" />
+    <Content Remove="wwwroot\Video\**" />
+    <EmbeddedResource Remove="wwwroot\Video\**" />
+    <None Remove="wwwroot\Video\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
@@ -20,7 +27,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Video\" />
+    <Folder Include="wwwroot\cities\aswan\placeimage\" />
+    <Folder Include="wwwroot\cities\fayoum\placeimage\" />
+    <Folder Include="wwwroot\cities\giza\placeimage\" />
+    <Folder Include="wwwroot\cities\hurg\placeimage\" />
+    <Folder Include="wwwroot\cities\ismalia\placeimage\" />
+    <Folder Include="wwwroot\cities\luxor\placeimage\" />
+    <Folder Include="wwwroot\cities\marsaalam\placeimage\" />
+    <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
+    <Folder Include="wwwroot\cities\porsaid\placeimage\" />
+    <Folder Include="wwwroot\cities\redsea\placeimage\" />
+    <Folder Include="wwwroot\cities\sharm\placeimage\" />
+    <Folder Include="wwwroot\cities\sina\placeimage\" />
+    <Folder Include="wwwroot\cities\suez\placeimage\" />
+    <Folder Include="wwwroot\cities\tanta\placeimage\" />
   </ItemGroup>
 
 </Project>
