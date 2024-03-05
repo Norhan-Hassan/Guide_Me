@@ -15,20 +15,20 @@ namespace Guide_Me
 {
     public class Program
     {
-        
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-           
-        // Add services to the container.
 
-        builder.Services.AddControllers();
+            // Add services to the container.
+
+            builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+           // builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             builder.Services.AddScoped<ICityService, CityService>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddHttpContextAccessor();
@@ -58,7 +58,7 @@ namespace Guide_Me
             //        ValidateAudience = true,
             //        ValidAudience = builder.Configuration["JWT:Audience"],
             //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
-            //     };
+            //    };
             //});
 
             //Authentication in swagger 
@@ -93,21 +93,22 @@ namespace Guide_Me
 
 
             var app = builder.Build();
-            // Configure the HTTP request pipeline.
+            //Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
-            //{
-            app.UseSwagger();
+            {
+                app.UseSwagger();
                 app.UseSwaggerUI();
-            //}
-            
-            app.UseStaticFiles();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseCors("AllowAll");
-            app.MapControllers();
+                //}
+
+                app.UseStaticFiles();
+                //app.UseAuthentication();
+                app.UseAuthorization();
+                app.UseCors("AllowAll");
+                app.MapControllers();
 
 
-            app.Run();
+                app.Run();
+            }
         }
     }
 }
