@@ -31,16 +31,11 @@
     <Folder Include="wwwroot\cities\fayoum\placeimage\" />
     <Folder Include="wwwroot\cities\giza\placeimage\" />
     <Folder Include="wwwroot\cities\hurg\placeimage\" />
-    <Folder Include="wwwroot\cities\ismalia\placeimage\" />
     <Folder Include="wwwroot\cities\luxor\placeimage\" />
-    <Folder Include="wwwroot\cities\marsaalam\placeimage\" />
     <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
-    <Folder Include="wwwroot\cities\porsaid\placeimage\" />
     <Folder Include="wwwroot\cities\redsea\placeimage\" />
     <Folder Include="wwwroot\cities\sharm\placeimage\" />
     <Folder Include="wwwroot\cities\sina\placeimage\" />
-    <Folder Include="wwwroot\cities\suez\placeimage\" />
-    <Folder Include="wwwroot\cities\tanta\placeimage\" />
   </ItemGroup>
 
 </Project>
