@@ -31,7 +31,6 @@
     <Folder Include="wwwroot\cities\fayoum\placeimage\" />
     <Folder Include="wwwroot\cities\giza\placeimage\" />
     <Folder Include="wwwroot\cities\hurg\placeimage\" />
-    <Folder Include="wwwroot\cities\luxor\placeimage\" />
     <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
     <Folder Include="wwwroot\cities\redsea\placeimage\" />
     <Folder Include="wwwroot\cities\sharm\placeimage\" />
