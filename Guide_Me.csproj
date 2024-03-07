@@ -33,6 +33,7 @@
     <Folder Include="wwwroot\cities\giza\Entertainment\" />
     <Folder Include="wwwroot\cities\giza\Religious\" />
     <Folder Include="wwwroot\cities\hurg\placeimage\" />
+    <Folder Include="wwwroot\cities\luxor\Religious\" />
     <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
     <Folder Include="wwwroot\cities\sharm\placeimage\" />
     <Folder Include="wwwroot\cities\sina\placeimage\" />
