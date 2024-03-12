@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Guide_Me.Models
 {
+
     public class Place
     {
         [Key]
@@ -19,6 +20,9 @@ namespace Guide_Me.Models
         public virtual City City { get; set; }
         public virtual ICollection<PlaceMedia> PlaceMedias { get; set; }
         public virtual ICollection<PlaceItem> PlaceItems { get; set; }
+        public virtual ICollection<Favorites> Favorites { get; set; }
+
+
 
     }
 }

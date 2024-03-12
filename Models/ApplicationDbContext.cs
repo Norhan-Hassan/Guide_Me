@@ -18,6 +18,7 @@ namespace Guide_Me.Models
 
         public DbSet<PlaceItemMedia> placeItemMedias { get; set; }
 
+        public DbSet<Favorites> Favorites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +47,10 @@ namespace Guide_Me.Models
                 .HasMany(p => p.PlaceItemMedias)
                 .WithOne(placeItemMedia=>placeItemMedia.placeItem)
                 .HasForeignKey(placeItemMedia=>placeItemMedia.placeItemID);
+            modelBuilder.Entity<Favorites>()
+                .HasOne(p => p.tourist)
+                .WithMany() // Assuming a Tourist can have multiple preferences
+                .HasForeignKey(p => p.TouristID);
 
             base.OnModelCreating(modelBuilder);
         }
