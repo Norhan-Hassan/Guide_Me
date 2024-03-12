@@ -31,6 +31,7 @@ namespace Guide_Me
            // builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             builder.Services.AddScoped<ICityService, CityService>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
+            builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>
             {

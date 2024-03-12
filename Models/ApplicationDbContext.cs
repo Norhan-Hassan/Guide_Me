@@ -17,6 +17,7 @@ namespace Guide_Me.Models
         public DbSet<PlaceItem> placeItem { get; set; }
 
         public DbSet<PlaceItemMedia> placeItemMedias { get; set; }
+        public DbSet<History> Histories { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

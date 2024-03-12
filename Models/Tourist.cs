@@ -19,5 +19,6 @@ namespace Guide_Me.Models
         public string email { get; set; }
         [Required]
         public string language { get; set; }
+        public virtual ICollection<History> Histories { get; set; }
     }
 }
