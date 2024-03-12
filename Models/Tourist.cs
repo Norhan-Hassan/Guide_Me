@@ -6,8 +6,8 @@ namespace Guide_Me.Models
 {
     public class Tourist:ApplicationUser
     {
-        [Key]
-        public int ID { get; set; }
+        //[Key]
+        //public int ID { get; set; }
         [Required]
         public string userName { get; set; }
         [Required]
@@ -19,6 +19,5 @@ namespace Guide_Me.Models
         public string email { get; set; }
         [Required]
         public string language { get; set; }
-        public virtual ICollection<History> Histories { get; set; }
     }
 }

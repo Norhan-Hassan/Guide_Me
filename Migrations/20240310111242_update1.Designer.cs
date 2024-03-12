@@ -4,6 +4,7 @@ using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Guide_Me.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240310111242_update1")]
+    partial class update1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,30 +109,6 @@ namespace Guide_Me.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Cities");
-                });
-
-            modelBuilder.Entity("Guide_Me.Models.Favorites", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PlaceID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TouristID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlaceID");
-
-                    b.HasIndex("TouristID");
-
-                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
@@ -230,6 +209,19 @@ namespace Guide_Me.Migrations
                     b.HasIndex("PlaceId");
 
                     b.ToTable("placeMedias");
+                });
+
+            modelBuilder.Entity("Guide_Me.Models.Prefernces", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Prefernces");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -365,25 +357,6 @@ namespace Guide_Me.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Guide_Me.Models.Favorites", b =>
-                {
-                    b.HasOne("Guide_Me.Models.Place", "Place")
-                        .WithMany("Favorites")
-                        .HasForeignKey("PlaceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Guide_Me.Models.ApplicationUser", "tourist")
-                        .WithMany()
-                        .HasForeignKey("TouristID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Place");
-
-                    b.Navigation("tourist");
-                });
-
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
                 {
                     b.HasOne("Guide_Me.Models.City", "City")
@@ -486,8 +459,6 @@ namespace Guide_Me.Migrations
 
             modelBuilder.Entity("Guide_Me.Models.Place", b =>
                 {
-                    b.Navigation("Favorites");
-
                     b.Navigation("PlaceItems");
 
                     b.Navigation("PlaceMedias");
