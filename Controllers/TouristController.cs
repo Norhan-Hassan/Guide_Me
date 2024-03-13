@@ -13,101 +13,103 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   
+
     public class TouristController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IConfiguration config;
+        private readonly UserManager<Tourist> _userManager;
 
-        public TouristController(UserManager<ApplicationUser> userManager,IConfiguration config)
+        public TouristController(UserManager<Tourist> userManager)
         {
-            this.userManager = userManager;
-            this.config = config;
+            _userManager = userManager;
         }
-
-        public UserManager<ApplicationUser> UserManager { get; }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> SignUp(TouristRegisterDto tourist)
+        public async Task<IActionResult> SignUp(TouristRegisterDto touristDto)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                ApplicationUser applicationUser = new ApplicationUser();
-                applicationUser.UserName = tourist.userName;
-                applicationUser.Email = tourist.email;
-                IdentityResult result =await userManager.CreateAsync(applicationUser, tourist.password);
-                if(result.Succeeded)
+                var tourist = new Tourist
                 {
-                    return Ok("Account Added successfuly");
+                    UserName = touristDto.userName,
+                    Email = touristDto.email,
+                    Language = touristDto.language,
+                };
+
+                var result = await _userManager.CreateAsync(tourist, touristDto.password);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Account added successfully");
                 }
                 else
                 {
-                    return BadRequest("Account Already Exist");//result.Errors.FirstOrDefault()
+                    return BadRequest(result.Errors.FirstOrDefault()?.Description ?? "Failed to create account");
                 }
             }
             else
             {
-                return BadRequest(ModelState); // another option to make custome class contains model state directly
+                return BadRequest(ModelState);
             }
         }
 
-        [HttpPost("signin")]
-        public async Task<IActionResult> SignIn(TouristLoginDto touristLogin)
-        {
-            if(ModelState.IsValid)
-            {
-                ApplicationUser tourist = await userManager.FindByNameAsync(touristLogin.userName);
-                if(tourist != null)
-                {
-                    bool found = await userManager.CheckPasswordAsync(tourist, touristLogin.password);
-                    if (found)
-                    {
-                        //claims 
-                        List<Claim> claims = new List<Claim>();
-                        claims.Add(new Claim(ClaimTypes.Name, tourist.UserName));
-                        claims.Add(new Claim(ClaimTypes.NameIdentifier, tourist.Id));
-                        claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
-                        //security key
-                        SecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Secret"]));
+        //[HttpPost("signin")]
+        //public async Task<IActionResult> SignIn(TouristLoginDto touristLogin)
+        //{
+        //    if(ModelState.IsValid)
+        //    {
+        //        ApplicationUser tourist = await userManager.FindByNameAsync(touristLogin.userName);
+        //        if(tourist != null)
+        //        {
+        //            bool found = await userManager.CheckPasswordAsync(tourist, touristLogin.password);
+        //            if (found)
+        //            {
+        //                //claims 
+        //                List<Claim> claims = new List<Claim>();
+        //                claims.Add(new Claim(ClaimTypes.Name, tourist.UserName));
+        //                claims.Add(new Claim(ClaimTypes.NameIdentifier, tourist.Id));
+        //                claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
-                        //signing Credentials
-                        SigningCredentials signinCred = new SigningCredentials( securityKey,SecurityAlgorithms.HmacSha256 );
+        //                //security key
+        //                SecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Secret"]));
 
-                        //roles
-                        var roles = await userManager.GetRolesAsync(tourist);
-                        foreach (var role in roles)
-                        {
-                            claims.Add(new Claim(ClaimTypes.Role, role));
+        //                //signing Credentials
+        //                SigningCredentials signinCred = new SigningCredentials( securityKey,SecurityAlgorithms.HmacSha256 );
 
-                        }
+        //                //roles
+        //                var roles = await userManager.GetRolesAsync(tourist);
+        //                foreach (var role in roles)
+        //                {
+        //                    claims.Add(new Claim(ClaimTypes.Role, role));
 
-                        JwtSecurityToken jwttoken = new JwtSecurityToken(
+        //                }
 
-                             issuer: config["JWT:Issuer"],
-                             audience: config["JWT:Audience"],
-                             claims: claims,
-                             expires: DateTime.Now.AddHours(1),
-                             signingCredentials: signinCred
-                            );
+        //                JwtSecurityToken jwttoken = new JwtSecurityToken(
+
+        //                     issuer: config["JWT:Issuer"],
+        //                     audience: config["JWT:Audience"],
+        //                     claims: claims,
+        //                     expires: DateTime.Now.AddHours(1),
+        //                     signingCredentials: signinCred
+        //                    );
 
 
-                        return Ok(
-                            new
-                            {
-                                token = new JwtSecurityTokenHandler().WriteToken(jwttoken),
-                                expiration = jwttoken.ValidTo
-                            });
-                    }
-                    else
-                        return Unauthorized();
-                }
-                else
-                    return Unauthorized("User doesnot Exist");
-            }
-            else
-                return Unauthorized();
-        }
+        //                return Ok(
+        //                    new
+        //                    {
+        //                        token = new JwtSecurityTokenHandler().WriteToken(jwttoken),
+        //                        expiration = jwttoken.ValidTo
+        //                    });
+        //            }
+        //            else
+        //                return Unauthorized();
+        //        }
+        //        else
+        //            return Unauthorized("User doesnot Exist");
+        //    }
+        //    else
+        //        return Unauthorized();
+        //}
 
     }
 }

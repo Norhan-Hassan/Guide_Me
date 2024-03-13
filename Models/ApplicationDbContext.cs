@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Guide_Me.Models
 {
-    public class ApplicationDbContext :IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<Tourist>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -17,44 +17,17 @@ namespace Guide_Me.Models
         public DbSet<PlaceItem> placeItem { get; set; }
 
         public DbSet<PlaceItemMedia> placeItemMedias { get; set; }
-        public DbSet<History> Histories { get; set; }
 
-        public DbSet<Favorites> Favorites { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<Tourist> Tourist { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            // Configure your entity mappings here
-            modelBuilder.Entity<Place>().HasKey(p => p.Id);
-            modelBuilder.Entity<City>().HasKey(c => c.Id);
-            modelBuilder.Entity<PlaceMedia>().HasKey(placemedia => placemedia.Id);
+            base.OnModelCreating(builder);
 
-            // Define relationships (if any)
-            modelBuilder.Entity<Place>()
-                .HasOne(p => p.City)
-                .WithMany(c => c.Places)
-                .HasForeignKey(p => p.CityId);
-
-            modelBuilder.Entity<Place>()
-                .HasMany(p=>p.PlaceMedias)
-                .WithOne(placemedia=> placemedia.Place)
-                .HasForeignKey(pm => pm.PlaceId);
-
-            modelBuilder.Entity<Place>()
-                .HasMany(p => p.PlaceItems)
-                .WithOne(placeItem => placeItem.place)
-                .HasForeignKey(placeItem => placeItem.placeID);
-
-            modelBuilder.Entity<PlaceItem>()
-                .HasMany(p => p.PlaceItemMedias)
-                .WithOne(placeItemMedia=>placeItemMedia.placeItem)
-                .HasForeignKey(placeItemMedia=>placeItemMedia.placeItemID);
-            modelBuilder.Entity<Favorites>()
-                .HasOne(p => p.tourist)
-                .WithMany() // Assuming a Tourist can have multiple preferences
-                .HasForeignKey(p => p.TouristID);
-
-            base.OnModelCreating(modelBuilder);
+            // Configure table name for Tourist entity
+            builder.Entity<Tourist>().ToTable("Tourist");
         }
+
 
     }
 }

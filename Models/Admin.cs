@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Guide_Me.Models
 {
-    public class Admin: ApplicationUser
+    public class Admin 
     {
         [Key]
         public int ID { get; set; }

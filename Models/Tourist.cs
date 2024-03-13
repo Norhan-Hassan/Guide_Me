@@ -1,23 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace Guide_Me.Models
 {
-    public class Tourist:ApplicationUser
+    public class Tourist : IdentityUser
     {
-        //[Key]
-        //public int ID { get; set; }
-        [Required]
-        public string userName { get; set; }
-        [Required]
-        public string password { get; set; }
+        public string Language { get; set; }
+        public virtual ICollection<Favorite> Favorites { get; set; }
 
-        [Compare("Password")]
-        public string ConfirmPassword { get; set; }
-        [Required]
-        public string email { get; set; }
-        [Required]
-        public string language { get; set; }
     }
 }

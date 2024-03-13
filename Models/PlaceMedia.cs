@@ -11,7 +11,7 @@ namespace Guide_Me.Models
         public string MediaType { get; set; }
         public string MediaContent { get; set; }
 
-        [ForeignKey("PlaceMedia")]
+        [ForeignKey("Place")]
         public int PlaceId { get; set; }
         public virtual Place Place { get; set; }
     }
