@@ -104,9 +104,23 @@ namespace Guide_Me.Services
             return $"{baseUrl}/{mediaContent}";
         }
 
+        
+        public async Task PostLocationAsync(string placeName, double latitude, double longitude)
+        {
+            var place = await _context.Places.FirstOrDefaultAsync(p => p.PlaceName == placeName);
+            if (place == null)
+            {
+                throw new Exception("Place not found");
+            }
+            else
+            {
+                place.latitude = latitude;
+                place.longitude = longitude;
 
-
-
+                await _context.SaveChangesAsync();
+            } 
+            
+        }
 
 
     }

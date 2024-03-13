@@ -16,7 +16,10 @@ namespace Guide_Me.Models
 
         [ForeignKey("City")]
         public int CityId { get; set; }
-
+        [Required]
+        public double longitude { get; set; }
+        [Required]
+        public double latitude { get; set; }
         public virtual City City { get; set; }
         public virtual ICollection<PlaceMedia> PlaceMedias { get; set; }
         public virtual ICollection<PlaceItem> PlaceItems { get; set; }

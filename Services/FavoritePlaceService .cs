@@ -26,7 +26,7 @@ namespace Guide_Me.Services
 
             }
             //var existingFavorite = _context.Pr
-        //                .FirstOrDefault(fp => fp.PlaceId == request.PlaceId && fp.TouristId == request.TouristId);
+            //          .FirstOrDefault(fp => fp.PlaceId == request.PlaceId && fp.TouristId == request.TouristId);
 
             //            if (existingFavorite == null)
             //            {
@@ -35,7 +35,7 @@ namespace Guide_Me.Services
             //                    PlaceId = request.PlaceId
             //                });
 
-            return (" added successfully");
+                        return (" added successfully");
         }
 
        

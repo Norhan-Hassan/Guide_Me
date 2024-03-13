@@ -10,6 +10,6 @@ namespace Guide_Me.Controllers
 
     public class TouristFavouritesController : ControllerBase
     {
-
+       
     }
 }

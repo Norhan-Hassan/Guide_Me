@@ -39,5 +39,19 @@ namespace Guide_Me.Controllers
 
             return Ok(placeItems);
         }
+       
+        [HttpPost("{placeName}/places/location")]
+        public async Task<IActionResult> PostLocationByName(string placeName, double latitude, double longitude)
+        {
+            try
+            {
+                await _placeService.PostLocationAsync(placeName, latitude, longitude);
+                return Ok("Location updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

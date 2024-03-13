@@ -7,5 +7,7 @@ namespace Guide_Me.Services
     {
         List<PlaceDto> GetPlaces(string cityName);
         List<PlaceItemDto> GetPlaceItems(string placeName);
+        Task PostLocationAsync(string placeName, double latitude, double longitude);
+
     }
 }
