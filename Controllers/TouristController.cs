@@ -28,6 +28,20 @@ namespace Guide_Me.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Check if a tourist with the provided username already exists
+                var existingTouristByUsername = await _userManager.FindByNameAsync(touristDto.userName);
+                if (existingTouristByUsername != null)
+                {
+                    return BadRequest("Username is already taken.");
+                }
+
+                // Check if a tourist with the provided email already exists
+                var existingTouristByEmail = await _userManager.FindByEmailAsync(touristDto.email);
+                if (existingTouristByEmail != null)
+                {
+                    return BadRequest("A tourist with this email already exists.");
+                }
+
                 var tourist = new Tourist
                 {
                     UserName = touristDto.userName,
