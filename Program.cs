@@ -33,6 +33,10 @@ namespace Guide_Me
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
+            builder.Services.AddLogging(builder =>
+            {
+                builder.AddConsole(); // or other logging providers
+            });
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>
             {
