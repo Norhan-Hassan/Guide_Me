@@ -11,7 +11,7 @@ namespace Guide_Me.Models
         [ForeignKey("Place")]
         public int PlaceId { get; set; }
         [ForeignKey("Tourist")]
-        public int TouristId { get; set; }
+        public string TouristId { get; set; }
         [Required]
         public DateTime Date { get; set; }
 

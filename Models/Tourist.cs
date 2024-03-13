@@ -7,6 +7,7 @@ namespace Guide_Me.Models
     {
         public string Language { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; }
+        public virtual ICollection<History> histories { get; set; }
 
     }
 }

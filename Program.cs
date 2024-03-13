@@ -31,7 +31,7 @@ namespace Guide_Me
             builder.Services.AddIdentity<Tourist, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddScoped<ICityService, CityService>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
-            //builder.Services.AddScoped<IHistoryService, HistoryService>();
+            builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>

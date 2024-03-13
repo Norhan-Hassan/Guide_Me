@@ -2,7 +2,7 @@
 {
     public interface IHistoryService
     {
-        void UpdatePlaceHistory(int placeId, int touristId,  DateTime date);
+        void UpdatePlaceHistory(int placeId, string touristId,  DateTime date);
 
     }
 }

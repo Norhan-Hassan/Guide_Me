@@ -19,6 +19,7 @@ namespace Guide_Me.Models
         public DbSet<PlaceItemMedia> placeItemMedias { get; set; }
 
         public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<History> histories { get; set; }
         public DbSet<Tourist> Tourist { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
