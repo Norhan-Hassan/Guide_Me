@@ -48,54 +48,54 @@ namespace Guide_Me
                                .AllowAnyHeader();
                     });
             });
-            //builder.Services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddJwtBearer(options =>
-            //{
-            //    options.SaveToken = true;
-            //    options.RequireHttpsMetadata = false;
-            //    options.TokenValidationParameters = new TokenValidationParameters()
-            //    {
-            //        ValidateIssuer = true,
-            //        ValidIssuer = builder.Configuration["JWT:Issuer"],
-            //        ValidateAudience = true,
-            //        ValidAudience = builder.Configuration["JWT:Audience"],
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
-            //    };
-            //});
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+                };
+            });
 
-            //Authentication in swagger 
-            //builder.Services.AddSwaggerGen(opt =>
-            //{
-            //    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Guide_Me_API", Version = "v1" });
-            //    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            //    {
-            //        In = ParameterLocation.Header,
-            //        Description = "Please enter token",
-            //        Name = "Authorization",
-            //        Type = SecuritySchemeType.Http,
-            //        BearerFormat = "JWT",
-            //        Scheme = "bearer"
-            //    });
+            //Authentication in swagger
+            builder.Services.AddSwaggerGen(opt =>
+            {
+                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Guide_Me_API", Version = "v1" });
+                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "bearer"
+                });
 
-            //    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //        {
-            //            {
-            //                new OpenApiSecurityScheme
-            //                {
-            //                    Reference = new OpenApiReference
-            //                    {
-            //                        Type=ReferenceType.SecurityScheme,
-            //                        Id="Bearer"
-            //                    }
-            //                },
-            //                new string[]{}
-            //            }
-            //        });
-            //});
+                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type=ReferenceType.SecurityScheme,
+                                    Id="Bearer"
+                                }
+                            },
+                            new string[]{}
+                        }
+                    });
+            });
 
 
             var app = builder.Build();
@@ -107,7 +107,7 @@ namespace Guide_Me
                 //}
 
                 app.UseStaticFiles();
-                //app.UseAuthentication();
+                app.UseAuthentication();
                 app.UseAuthorization();
                 app.UseCors("AllowAll");
                 app.MapControllers();
@@ -118,3 +118,4 @@ namespace Guide_Me
         }
     }
 }
+

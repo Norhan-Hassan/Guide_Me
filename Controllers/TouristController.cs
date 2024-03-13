@@ -13,14 +13,16 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
     public class TouristController : ControllerBase
     {
         private readonly UserManager<Tourist> _userManager;
+        private readonly IConfiguration config;
 
-        public TouristController(UserManager<Tourist> userManager)
+        public TouristController(UserManager<Tourist> userManager, IConfiguration _config)
         {
             _userManager = userManager;
+            config = _config;
+
         }
 
         [HttpPost("signup")]
@@ -67,63 +69,62 @@ namespace Guide_Me.Controllers
         }
 
 
-        //[HttpPost("signin")]
-        //public async Task<IActionResult> SignIn(TouristLoginDto touristLogin)
-        //{
-        //    if(ModelState.IsValid)
-        //    {
-        //        ApplicationUser tourist = await userManager.FindByNameAsync(touristLogin.userName);
-        //        if(tourist != null)
-        //        {
-        //            bool found = await userManager.CheckPasswordAsync(tourist, touristLogin.password);
-        //            if (found)
-        //            {
-        //                //claims 
-        //                List<Claim> claims = new List<Claim>();
-        //                claims.Add(new Claim(ClaimTypes.Name, tourist.UserName));
-        //                claims.Add(new Claim(ClaimTypes.NameIdentifier, tourist.Id));
-        //                claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+        [HttpPost("signin")]
+        public async Task<IActionResult> SignIn(TouristLoginDto touristLogin)
+        {
+            if (ModelState.IsValid)
+            {
+                Tourist tourist = await _userManager.FindByNameAsync(touristLogin.userName);
+                if (tourist != null)
+                {
+                    bool found = await _userManager.CheckPasswordAsync(tourist, touristLogin.password);
+                    if (found)
+                    {
+                        //claims 
+                        List<Claim> claims = new List<Claim>();
+                        claims.Add(new Claim(ClaimTypes.Name, tourist.UserName));
+                        claims.Add(new Claim(ClaimTypes.NameIdentifier, tourist.Id));
+                        claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
-        //                //security key
-        //                SecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Secret"]));
+                        //security key
+                        SecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Secret"]));
 
-        //                //signing Credentials
-        //                SigningCredentials signinCred = new SigningCredentials( securityKey,SecurityAlgorithms.HmacSha256 );
+                        //signing Credentials
+                        SigningCredentials signinCred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        //                //roles
-        //                var roles = await userManager.GetRolesAsync(tourist);
-        //                foreach (var role in roles)
-        //                {
-        //                    claims.Add(new Claim(ClaimTypes.Role, role));
+                        //roles
+                        var roles = await _userManager.GetRolesAsync(tourist);
+                        foreach (var role in roles)
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role));
 
-        //                }
+                        }
 
-        //                JwtSecurityToken jwttoken = new JwtSecurityToken(
+                        JwtSecurityToken jwttoken = new JwtSecurityToken(
 
-        //                     issuer: config["JWT:Issuer"],
-        //                     audience: config["JWT:Audience"],
-        //                     claims: claims,
-        //                     expires: DateTime.Now.AddHours(1),
-        //                     signingCredentials: signinCred
-        //                    );
+                             issuer: config["JWT:Issuer"],
+                             audience: config["JWT:Audience"],
+                             claims: claims,
+                             expires: DateTime.Now.AddHours(1),
+                             signingCredentials: signinCred
+                            );
 
 
-        //                return Ok(
-        //                    new
-        //                    {
-        //                        token = new JwtSecurityTokenHandler().WriteToken(jwttoken),
-        //                        expiration = jwttoken.ValidTo
-        //                    });
-        //            }
-        //            else
-        //                return Unauthorized();
-        //        }
-        //        else
-        //            return Unauthorized("User doesnot Exist");
-        //    }
-        //    else
-        //        return Unauthorized();
-        //}
-
+                        return Ok(
+                            new
+                            {
+                                token = new JwtSecurityTokenHandler().WriteToken(jwttoken),
+                                expiration = jwttoken.ValidTo
+                            });
+                    }
+                    else
+                        return Unauthorized();
+                }
+                else
+                    return Unauthorized("User doesnot Exist");
+            }
+            else
+                return Unauthorized();
+        }
     }
 }
