@@ -6,6 +6,7 @@ namespace Guide_Me.DTO
     {
         [Required(ErrorMessage = "Place Name Is Required")]
         public string  placeName { get; set; }
+
         [Required(ErrorMessage = "Latitude value Is Required")]
         public double latitude { get; set; }
 
