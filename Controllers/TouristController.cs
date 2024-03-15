@@ -103,7 +103,7 @@ namespace Guide_Me.Controllers
                         JwtSecurityToken jwttoken = new JwtSecurityToken(
 
                              issuer: config["JWT:Issuer"],
-                             audience: config["JWT:Audience"],
+                             //audience: config["JWT:Audience"],
                              claims: claims,
                              expires: DateTime.Now.AddHours(1),
                              signingCredentials: signinCred
