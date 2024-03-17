@@ -22,7 +22,7 @@ namespace Guide_Me.Controllers
 
 
         [HttpPost]
-        public IActionResult UpdatePlaceHistory(int placeId, string touristname)
+        public IActionResult UpdatePlaceHistory(string placename, string touristname)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Guide_Me.Controllers
                 DateTime currentDate = DateTime.Now;
 
 
-                _historyService.UpdatePlaceHistory(placeId, touristname, currentDate);
+                _historyService.UpdatePlaceHistory(placename, touristname, currentDate);
 
 
                 return Ok("Place history updated successfully.");

@@ -12,18 +12,30 @@ namespace Guide_Me.Services
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITouristService _ITouristService;
+        private readonly IPlaceService _IPlaceService;
 
-
-        public HistoryService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITouristService ITouristService)
+        public HistoryService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITouristService ITouristService, IPlaceService IPlaceService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _ITouristService = ITouristService;
+            _IPlaceService = IPlaceService;
         }
 
-        public void UpdatePlaceHistory(int placeId, string Touristname, DateTime date)
+        public void UpdatePlaceHistory(string placeName, string touristName, DateTime date)
         {
-            var touristId = _ITouristService.GetUserIdByUsername(Touristname);
+            var touristId = _ITouristService.GetUserIdByUsername(touristName);
+            if (touristId == null)
+            {
+                throw new ArgumentException("Tourist not found", nameof(touristName));
+            }
+
+            var placeId = _IPlaceService.GetPlaceIdByPlaceName(placeName);
+            if (placeId == 0)
+            {
+                throw new ArgumentException("Place not found", nameof(placeName));
+            }
+
             var newHistoryEntry = new History
             {
                 PlaceId = placeId,
