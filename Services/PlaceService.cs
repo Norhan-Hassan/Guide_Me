@@ -8,11 +8,12 @@ using System.Web;
 
 namespace Guide_Me.Services
 {
-    public class PlaceService: IPlaceService
+    public class PlaceService : IPlaceService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApplicationDbContext _context;
-        public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) {
+        public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -24,32 +25,32 @@ namespace Guide_Me.Services
 
             if (place != null)
             {
-  
-                var placeItems=_context.placeItem
+
+                var placeItems = _context.placeItem
                     .Include(p => p.PlaceItemMedias)
-                    .Where(pi => pi.placeID==place.Id)
+                    .Where(pi => pi.placeID == place.Id)
                     .ToList();
 
                 foreach (var placeItem in placeItems)
                 {
                     PlaceWithoutMediaDto placeDto = new PlaceWithoutMediaDto
-                        {
-                            Name = place.PlaceName,
-                            Category = place.Category,
-                      
-                        };
+                    {
+                        Name = place.PlaceName,
+                        Category = place.Category,
+
+                    };
 
                     var placeItemDto = new PlaceItemDto
                     {
-                         ID=placeItem.ID,
-                         placeItemName=placeItem.placeItemName,
-                         Media =placeItem.PlaceItemMedias != null?
-                         placeItem.PlaceItemMedias.Select(media=>new ItemMediaDto
+                        ID = placeItem.ID,
+                        placeItemName = placeItem.placeItemName,
+                        Media = placeItem.PlaceItemMedias != null ?
+                         placeItem.PlaceItemMedias.Select(media => new ItemMediaDto
                          {
-                             MediaContent=media.MediaContent,
-                             MediaType=media.MediaType,
+                             MediaContent = media.MediaContent,
+                             MediaType = media.MediaType,
                          })
-                         .ToList() 
+                         .ToList()
                          : new List<ItemMediaDto>()
 
                     };
@@ -98,13 +99,13 @@ namespace Guide_Me.Services
 
         private string GetMediaUrl(string mediaContent)
         {
-            
+
             var request = _httpContextAccessor.HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
             return $"{baseUrl}/{mediaContent}";
         }
 
-        
+
         public async Task PostLocationAsync(string placeName, double latitude, double longitude)
         {
             var place = await _context.Places.FirstOrDefaultAsync(p => p.PlaceName == placeName);
@@ -118,8 +119,14 @@ namespace Guide_Me.Services
                 place.longitude = longitude;
 
                 await _context.SaveChangesAsync();
-            } 
-            
+            }
+
+        }
+        public int GetPlaceIdByPlaceName(string Placename)
+        {
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == Placename);
+
+            return place != null ? place.Id : 0;
         }
 
 

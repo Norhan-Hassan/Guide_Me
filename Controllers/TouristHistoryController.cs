@@ -8,7 +8,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TouristHistoryController : ControllerBase
     {
         private readonly ILogger<TouristHistoryController> _logger;
@@ -20,24 +20,24 @@ namespace Guide_Me.Controllers
             _logger = logger;
         }
 
-        
+
         [HttpPost]
         public IActionResult UpdatePlaceHistory(int placeId, string touristname)
         {
             try
             {
-                
+
                 DateTime currentDate = DateTime.Now;
 
 
-                _historyService.UpdatePlaceHistory(placeId, touristname,currentDate);
+                _historyService.UpdatePlaceHistory(placeId, touristname, currentDate);
 
-                
+
                 return Ok("Place history updated successfully.");
             }
             catch (Exception ex)
             {
-                
+
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }

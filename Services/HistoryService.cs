@@ -11,21 +11,24 @@ namespace Guide_Me.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITouristService _ITouristService;
 
-        public HistoryService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+
+        public HistoryService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITouristService ITouristService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _ITouristService = ITouristService;
         }
 
-        public void UpdatePlaceHistory(int placeId, string Touristname,DateTime date)
+        public void UpdatePlaceHistory(int placeId, string Touristname, DateTime date)
         {
-            var touristId = GetUserIdByUsername(Touristname);
+            var touristId = _ITouristService.GetUserIdByUsername(Touristname);
             var newHistoryEntry = new History
             {
                 PlaceId = placeId,
                 TouristId = touristId,
-                Date = DateTime.Now
+                Date = date
             };
 
             _context.histories.Add(newHistoryEntry);
@@ -34,18 +37,18 @@ namespace Guide_Me.Services
 
         public List<TouristHistoryDto> GetTouristHistory(string Touristname)
         {
-            var touristId = GetUserIdByUsername(Touristname);
+            var touristId = _ITouristService.GetUserIdByUsername(Touristname);
 
             if (string.IsNullOrEmpty(touristId))
             {
-                
+
                 return new List<TouristHistoryDto>();
             }
 
             var userHistory = (from h in _context.histories
                                join p in _context.Places on h.PlaceId equals p.Id
                                join pm in _context.placeMedias on p.Id equals pm.PlaceId
-                               where h.TouristId == touristId 
+                               where h.TouristId == touristId
                                select new TouristHistoryDto
                                {
                                    Place = new PlaceDto
@@ -74,11 +77,6 @@ namespace Guide_Me.Services
             return $"{baseUrl}/{mediaContent}";
         }
 
-        public string GetUserIdByUsername(string username)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.UserName == username);
 
-            return user != null ? user.Id : null;
-        }
     }
 }

@@ -5,6 +5,8 @@ namespace Guide_Me.Services
 {
     public interface IFavoritePlaceService
     {
-        string MarkFavoritePlace( FavouritePlacesDto request);
+        void MarkFavoritePlace(FavouritePlacesDto request);
+
+        //List<PlaceDto> GetAllFavoritesByTourist(string touristName);
     }
 }
