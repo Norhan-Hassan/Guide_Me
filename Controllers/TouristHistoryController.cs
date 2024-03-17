@@ -8,7 +8,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class TouristHistoryController : ControllerBase
     {
         private readonly ILogger<TouristHistoryController> _logger;
