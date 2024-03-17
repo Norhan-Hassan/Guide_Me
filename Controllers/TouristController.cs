@@ -159,12 +159,23 @@ namespace Guide_Me.Controllers
             _signInManager = signInManager;
             _config = config;
         }
-
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp(TouristRegisterDto touristDto)
         {
             if (ModelState.IsValid)
             {
+                var existingTouristByUsername = await _userManager.FindByNameAsync(touristDto.userName);
+                if (existingTouristByUsername != null)
+                {
+                    return BadRequest("Username is already taken.");
+                }
+
+                var existingTouristByEmail = await _userManager.FindByEmailAsync(touristDto.email);
+                if (existingTouristByEmail != null)
+                {
+                    return BadRequest("Email is already taken.");
+                }
+
                 var tourist = new Tourist
                 {
                     UserName = touristDto.userName,
@@ -176,9 +187,9 @@ namespace Guide_Me.Controllers
 
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(tourist, isPersistent: false); // Sign in the user after successful registration
-                    var signUpToken = GenerateJwtToken(tourist, TimeSpan.FromMinutes(4)); // Generate JWT token with 7 days expiration for sign-up
-                    return Ok(new { token = signUpToken }); // Return token to the client
+                    await _signInManager.SignInAsync(tourist, isPersistent: false);
+                    var signUpToken = GenerateJwtToken(tourist, TimeSpan.FromMinutes(4)); 
+                    return Ok(new { token = signUpToken });
                 }
                 else
                 {
@@ -190,6 +201,7 @@ namespace Guide_Me.Controllers
                 return BadRequest(ModelState);
             }
         }
+
 
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn(TouristLoginDto touristLogin)
@@ -204,16 +216,14 @@ namespace Guide_Me.Controllers
 
                     if (result.Succeeded)
                     {
-                        var signInToken = GenerateJwtToken(user, TimeSpan.FromDays(3)); // Generate JWT token with 1 hour expiration for sign-in
-                        return Ok(new { token = signInToken }); // Return token to the client
+                        var signInToken = GenerateJwtToken(user, TimeSpan.FromDays(3)); 
+                        return Ok(new { token = signInToken }); 
                     }
                 }
 
-                // If the user does not exist or the sign-in fails, return an unauthorized response
                 return Unauthorized("Invalid username or password.");
             }
 
-            // If the model state is invalid, return a bad request response
             return BadRequest(ModelState);
         }
 
@@ -233,7 +243,7 @@ namespace Guide_Me.Controllers
                 issuer: _config["JWT:Issuer"],
                 audience: _config["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.Add(expiration), // Set token expiry based on the provided TimeSpan
+                expires: DateTime.UtcNow.Add(expiration), 
                 signingCredentials: signinCred
             );
 
