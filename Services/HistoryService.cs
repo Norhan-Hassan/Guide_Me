@@ -18,7 +18,7 @@ namespace Guide_Me.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public void UpdatePlaceHistory(int placeId, string Touristname)//,DateTime date)
+        public void UpdatePlaceHistory(int placeId, string Touristname,DateTime date)
         {
             var touristId = GetUserIdByUsername(Touristname);
             var newHistoryEntry = new History

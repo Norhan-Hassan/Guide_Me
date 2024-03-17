@@ -4,7 +4,7 @@ namespace Guide_Me.Services
 {
     public interface IHistoryService
     {
-        void UpdatePlaceHistory(int placeId, string Touristname);//,DateTime date);
+        void UpdatePlaceHistory(int placeId, string Touristname,DateTime date);
         List<TouristHistoryDto> GetTouristHistory(string Touristname);
 
     }
