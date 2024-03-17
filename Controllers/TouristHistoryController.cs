@@ -30,7 +30,7 @@ namespace Guide_Me.Controllers
                 DateTime currentDate = DateTime.Now;
 
                 
-                _historyService.UpdatePlaceHistory(placeId, touristname, currentDate);
+                _historyService.UpdatePlaceHistory(placeId, touristname,currentDate);
 
                 
                 return Ok("Place history updated successfully.");
