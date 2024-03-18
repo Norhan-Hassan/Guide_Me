@@ -7,7 +7,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class PlaceController : ControllerBase
     {
         private readonly IPlaceService _placeService;
