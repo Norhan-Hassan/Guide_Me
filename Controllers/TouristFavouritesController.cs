@@ -40,22 +40,22 @@ namespace Guide_Me.Controllers
             }
         }
 
-        //[HttpPost("GetTouristFavoritePlaces")]
-        //public IActionResult GetFavoritePlaces(string touristname)
-        //{
-        //    try
-        //  {
-        //        _logger.LogInformation($"Received request for tourist FavoritePlaces for username: {touristname}");
+        [HttpPost("GetTouristFavoritePlaces")]
+        public IActionResult GetFavoritePlaces(string touristname)
+        {
+            try
+            {
+                _logger.LogInformation($"Received request for tourist FavoritePlaces for username: {touristname}");
 
-        //       var FavoritePlaces = _IFavoritePlaceService.(touristname);
-        //        return Ok(FavoritePlaces);
-        //    }
-        //    catch (Exception ex)
-        //   {
-        //       _logger.LogError($"An error occurred while fetching tourist history for username {touristname}: {ex}");
-        //        return StatusCode(500, $"An error occurred: {ex.Message}");
-        //   }
-        //}
+                var FavoritePlaces = _IFavoritePlaceService.GetAllFavoritesByTourist(touristname);
+                return Ok(FavoritePlaces);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred while fetching tourist history for username {touristname}: {ex}");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
     }
 }

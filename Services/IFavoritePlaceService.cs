@@ -7,6 +7,6 @@ namespace Guide_Me.Services
     {
         void MarkFavoritePlace(FavouritePlacesDto request);
 
-        //List<PlaceDto> GetAllFavoritesByTourist(string touristName);
+        List<PlaceDto> GetAllFavoritesByTourist(string touristName);
     }
 }

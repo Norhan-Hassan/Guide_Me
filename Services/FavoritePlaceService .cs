@@ -5,6 +5,8 @@ using Guide_Me.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Azure.Core;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Guide_Me.Services
 {
@@ -52,29 +54,47 @@ namespace Guide_Me.Services
 
             _context.SaveChanges();
         }
-        //catch (Exception ex)
-        //{
-        //    // Log the exception
-        //    _logger.LogError(ex, "An error occurred while saving changes to the database: {Message}", ex.Message);
-        //    throw; // Rethrow the exception to propagate it further if necessary
-        //}
-        //public List<PlaceDto> GetAllFavoritesByTourist(string touristName) 
-        //{
-        //        List<PlaceDto> Places = new List<PlaceDto>();
-        //    var touristid = _ITouristService.GetUserIdByUsername(touristName);       
-        //    var favorites = _context.Favorites;
 
-        //        foreach ( var item  in  favorites)
-        //        {
-        //            if (item.TouristID == touristid)
-        //            {
 
-        //            }
+        public List<PlaceDto> GetAllFavoritesByTourist(string touristName)
+        {
+            var touristId = _ITouristService.GetUserIdByUsername(touristName);
 
-        //        }
+            if (string.IsNullOrEmpty(touristId))
+            {
+                // If the tourist does not exist, return an empty list
+                return new List<PlaceDto>();
+            }
 
-        //}
+            var favoritePlaces = _context.Favorites
+                .Where(f => f.TouristID == touristId)
+                .Select(f => f.PlaceID)
+                .ToList();
 
+            var places = _context.Places
+                .Where(p => favoritePlaces.Contains(p.Id))
+                .Select(p => new PlaceDto
+                {
+                    Name = p.PlaceName,
+                    Category = p.Category,
+                    Media = p.PlaceMedias.Select(pm => new PlaceMediaDto
+                    {
+                        MediaType = pm.MediaType,
+                        MediaContent = pm.MediaType.ToLower() == "text" ? pm.MediaContent : GetMediaUrl(pm.MediaContent, _httpContextAccessor.HttpContext)
+                    }).ToList()
+                })
+                .ToList();
+
+            return places;
+        }
+
+        private static string GetMediaUrl(string mediaContent, HttpContext httpContext)
+        {
+            var request = httpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            return $"{baseUrl}/{mediaContent}";
+        }
     }
 }
+
 

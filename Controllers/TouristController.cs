@@ -147,6 +147,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class TouristController : ControllerBase
     {
         private readonly UserManager<Tourist> _userManager;

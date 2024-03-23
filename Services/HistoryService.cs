@@ -89,6 +89,9 @@ namespace Guide_Me.Services
             return $"{baseUrl}/{mediaContent}";
         }
 
-
+        public void UpdatePlaceHistory(int placeId, string Touristname, DateTime date)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
