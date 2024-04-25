@@ -4,6 +4,7 @@ using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Guide_Me.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240425154311_rating")]
+    partial class rating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -208,9 +211,6 @@ namespace Guide_Me.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RatingID"));
 
-                    b.Property<int>("PlaceId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Rate")
                         .HasColumnType("int");
 
@@ -218,8 +218,6 @@ namespace Guide_Me.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RatingID");
-
-                    b.HasIndex("PlaceId");
 
                     b.HasIndex("TouristId");
 
@@ -512,17 +510,9 @@ namespace Guide_Me.Migrations
 
             modelBuilder.Entity("Guide_Me.Models.Rating", b =>
                 {
-                    b.HasOne("Guide_Me.Models.Place", "Place")
-                        .WithMany("Ratings")
-                        .HasForeignKey("PlaceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Guide_Me.Models.Tourist", "Tourist")
                         .WithMany("ratings")
                         .HasForeignKey("TouristId");
-
-                    b.Navigation("Place");
 
                     b.Navigation("Tourist");
                 });
@@ -590,8 +580,6 @@ namespace Guide_Me.Migrations
                     b.Navigation("PlaceItems");
 
                     b.Navigation("PlaceMedias");
-
-                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItem", b =>
