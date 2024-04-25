@@ -7,7 +7,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class PlaceController : ControllerBase
     {
         private readonly IPlaceService _placeService;
@@ -53,5 +53,18 @@ namespace Guide_Me.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("{placeName}/places/media")]
+        public IActionResult GetMediaByPlace(string placeName)
+        {
+            var placeMedia = _placeService.GetPlaceMedia(placeName);
+            if (placeMedia == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(placeMedia);
+        }
+
     }
 }

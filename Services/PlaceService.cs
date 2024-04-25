@@ -96,6 +96,45 @@ namespace Guide_Me.Services
             }
             return placeDtos;
         }
+        public List<PlaceMediaDto> GetPlaceMedia(string placeName)
+        {
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
+            var placeMediaMap = new List<PlaceMediaDto>();
+
+            if (place != null)
+            {
+                var placeMedia = _context.placeMedias
+                    .Where(pm => pm.PlaceId == place.Id)
+                    .ToList();
+
+                foreach (var media in placeMedia)
+                {
+                    var mediaDto = new PlaceMediaDto();
+
+                    if (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio")
+                    {
+                        mediaDto.MediaType = media.MediaType;
+                        mediaDto.MediaContent = (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio") ? GetMediaUrl(media.MediaContent) : media.MediaContent;
+                    }
+                    else
+                    {
+                        mediaDto.MediaType = media.MediaType;
+                        mediaDto.MediaContent = media.MediaContent;
+                    }
+
+                    placeMediaMap.Add(mediaDto);
+                }
+            }
+
+            return placeMediaMap;
+        }
+
+
+
+
+
+
+
 
         private string GetMediaUrl(string mediaContent)
         {

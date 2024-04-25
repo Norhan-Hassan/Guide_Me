@@ -10,6 +10,8 @@ namespace Guide_Me.Services
         Task PostLocationAsync(string placeName, double latitude, double longitude);
         int GetPlaceIdByPlaceName(string placeName);
 
+        public List<PlaceMediaDto> GetPlaceMedia(string placeName);
+
     }
 }
 
