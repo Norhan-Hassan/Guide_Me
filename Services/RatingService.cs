@@ -17,32 +17,6 @@ namespace Guide_Me.Services
             _IPlaceService = IPlaceService;
         }
 
-
-        //public bool RatePlace(RatePlaceDto ratePlaceDto)
-        //{
-        //    int placeId = _IPlaceService.GetPlaceIdByPlaceName(ratePlaceDto.placeName);
-        //    var TouristID = _ITouristService.GetUserIdByUsername(ratePlaceDto.touristName);
-        //    //to check if this tourist or place found in database or not
-        //    bool found = false;
-        //    if (placeId > 0 && TouristID != null)
-        //    {
-        //        // Add new rating to this place
-        //        _context.Rating.Add(new Rating
-        //        {
-        //            Rate = ratePlaceDto.ratingNum,
-        //            PlaceId = placeId,
-        //            TouristId = TouristID,
-        //        });
-        //        found = true;
-        //        _context.SaveChanges();
-        //    }
-        //    else
-        //    {
-        //        found = false;
-        //    }
-        //    return found;
-        //}
-
         public bool RatePlace(RatePlaceDto ratePlaceDto)
         {
             int placeId = _IPlaceService.GetPlaceIdByPlaceName(ratePlaceDto.placeName);
