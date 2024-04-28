@@ -19,5 +19,13 @@ namespace Guide_Me.Services
 
             return user != null ? user.Id : null;
         }
+        public string GetUserNameByUserId(string userId)
+        {
+            var users = _context.Users.Where(u => u.Id == userId).ToList();
+            var user = users.FirstOrDefault();
+            return user != null ? user.UserName : null;
+        }
+       
+        
     }
 }

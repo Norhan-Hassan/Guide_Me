@@ -10,11 +10,21 @@ namespace Guide_Me.Services
         private readonly IPlaceService _IPlaceService;
         private readonly ITouristService _ITouristService;
         private readonly ApplicationDbContext _context;
+        public Dictionary<int, List<string>> suggestions = new Dictionary<int, List<string>>()
+        {
+            {1, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Ineffective Communication","Lack Of Culture Sensitivity"] },
+            {2, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Effictive Safety","Ease Of Access"] },
+            {3, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Effictive Safety","Ease Of Access"] },
+            {4, ["Attractive Environment","Engaging Activity","Ease Of Access","Cleanliness Concerns","OverCorowding","High Prices"] },
+            {5, ["Attractive Environment","Engaging Activity","Ease Of Access","Effictive Safety","Culture Signficance","Sweet soul people"] }
+        };
+        
         public RatingService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService)
         {
             _context = context;
             _ITouristService = ITouristService;
             _IPlaceService = IPlaceService;
+
         }
 
         public bool RatePlace(RatePlaceDto ratePlaceDto)
@@ -53,9 +63,9 @@ namespace Guide_Me.Services
         public int GetOverAllRateOfPlace(string placeName)
         {
             int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeName);
-            List<Rating> rating = _context.Rating.Where(p => p.PlaceId==placeID).ToList();
+            List<Rating> rating = _context.Rating.Where(p => p.PlaceId == placeID).ToList();
             int sumOfRating = 0, overallRating = 0;
-             
+
 
             foreach (Rating rate in rating)
             {
@@ -69,7 +79,43 @@ namespace Guide_Me.Services
 
             return overallRating;
         }
+        public List<string> GetSuggestionsBasedOnRating(int ratenum)
+        {
+            foreach (var suggest in suggestions)
+            {
+                if(suggest.Key==ratenum)
+                {
+                    return suggest.Value;
+                }
+            }
+            return ["Not Found Suggestion For that Rate number"];
+        }
 
+        public bool AddSuggestionChoosen(string suggestion, RatePlaceDto ratingDto)
+        {
+            string touristID = _ITouristService.GetUserIdByUsername(ratingDto.touristName);
+            int placeID = _IPlaceService.GetPlaceIdByPlaceName(ratingDto.placeName);
 
+            if (placeID > 0 && touristID != null)
+            {
+                Rating rate = _context.Rating
+                    .Where(r => r.TouristId == touristID && r.PlaceId == placeID)
+                    .FirstOrDefault();
+
+                if (rate != null && rate.Rate==ratingDto.ratingNum)
+                {
+                    _context.RatingSuggestions.Add(new RatingSuggestion
+                    {
+                        Discription = suggestion,
+                        rateID = rate.RatingID,
+                    });
+
+                    _context.SaveChanges();
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

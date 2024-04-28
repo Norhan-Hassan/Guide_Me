@@ -1,4 +1,5 @@
 ﻿using Guide_Me.DTO;
+using Guide_Me.Models;
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +16,13 @@ namespace Guide_Me.Controllers
         {
             _ratingService = ratingService;
         }
-      
+
         [HttpPost("RatePlace")]
         public IActionResult RatePlace(RatePlaceDto request)
         {
             try
             {
-                if(_ratingService.RatePlace(request)==true)
+                if (_ratingService.RatePlace(request) == true)
                 {
                     return Ok("Place Rated Successfully.");
                 }
@@ -35,10 +36,33 @@ namespace Guide_Me.Controllers
             }
         }
         [HttpGet("{placeName}/OverAllRating")]
-        public IActionResult GetMediaByPlace(string placeName)
+        public IActionResult GetOverallRating(string placeName)
         {
-            int rate= _ratingService.GetOverAllRateOfPlace(placeName);
+            int rate = _ratingService.GetOverAllRateOfPlace(placeName);
             return Ok(rate);
+        }
+
+        [HttpGet("{RateNumber}/Rating/Suggestion")]
+        public IActionResult GetSggestions(int RateNumber)
+        {
+            List<string> suggestions = _ratingService.GetSuggestionsBasedOnRating(RateNumber).ToList();
+            if (suggestions.Count == 0)
+            {
+                return BadRequest("No Suggestions");
+            }
+            else
+            {
+                return Ok(suggestions);
+            }
+        }
+
+        [HttpPost("Add Suggestion Rate Chosen By Tourist ")]
+        public IActionResult AddSuggestionChosenByTourist(string Suggestion, RatePlaceDto request)
+        {
+            if(_ratingService.AddSuggestionChoosen(Suggestion, request)==true)
+                return Ok("Suggestion Saved");
+            else
+            { return BadRequest("Error in add suggestion rate"); }
         }
     }
 }

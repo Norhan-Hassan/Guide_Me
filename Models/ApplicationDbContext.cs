@@ -22,6 +22,9 @@ namespace Guide_Me.Models
         public DbSet<History> histories { get; set; }
         public DbSet<Tourist> Tourist { get; set; }
         public DbSet<Rating> Rating { get; set; }
+        public DbSet<RatingSuggestion> RatingSuggestions { get; set; }
+
+        public DbSet<Review> Reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

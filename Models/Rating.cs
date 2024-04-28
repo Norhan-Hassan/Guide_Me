@@ -14,5 +14,6 @@ namespace Guide_Me.Models
         public string TouristId { get; set; }
         public virtual Tourist Tourist { get; set; }
         public virtual Place Place { get; set; }
+        public virtual ICollection<RatingSuggestion> RatingSuggestions { get; set; }
     }
 }

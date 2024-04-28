@@ -3,6 +3,6 @@
     public interface ITouristService
     {
         string GetUserIdByUsername(string username);
-
+        string GetUserNameByUserId(string userId);
     }
 }

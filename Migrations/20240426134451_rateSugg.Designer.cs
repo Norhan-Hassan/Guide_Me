@@ -4,6 +4,7 @@ using Guide_Me.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Guide_Me.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240426134451_rateSugg")]
+    partial class rateSugg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,34 +250,6 @@ namespace Guide_Me.Migrations
                     b.HasIndex("rateID");
 
                     b.ToTable("RatingSuggestions");
-                });
-
-            modelBuilder.Entity("Guide_Me.Models.Review", b =>
-                {
-                    b.Property<int>("ReviewID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewID"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TouristId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("placeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReviewID");
-
-                    b.HasIndex("TouristId");
-
-                    b.HasIndex("placeId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.Tourist", b =>
@@ -591,23 +566,6 @@ namespace Guide_Me.Migrations
                     b.Navigation("Rating");
                 });
 
-            modelBuilder.Entity("Guide_Me.Models.Review", b =>
-                {
-                    b.HasOne("Guide_Me.Models.Tourist", "Tourist")
-                        .WithMany("reviews")
-                        .HasForeignKey("TouristId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Guide_Me.Models.Place", null)
-                        .WithMany("Reviews")
-                        .HasForeignKey("placeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tourist");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -673,8 +631,6 @@ namespace Guide_Me.Migrations
                     b.Navigation("PlaceMedias");
 
                     b.Navigation("Ratings");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Guide_Me.Models.PlaceItem", b =>
@@ -694,8 +650,6 @@ namespace Guide_Me.Migrations
                     b.Navigation("histories");
 
                     b.Navigation("ratings");
-
-                    b.Navigation("reviews");
                 });
 #pragma warning restore 612, 618
         }

@@ -25,8 +25,7 @@ namespace Guide_Me.Models
         public virtual ICollection<PlaceItem> PlaceItems { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; }
         public virtual ICollection<Rating>  Ratings{ get; set; }
-
-
+        public virtual ICollection<Review> Reviews { get; set; }
 
     }
 }
