@@ -22,20 +22,30 @@ namespace Guide_Me.Controllers
         }
 
 
-        [HttpPost("AddFvoritePlace")]
-        public IActionResult MarkFavoritePlace(FavouritePlacesDto request)
+        [HttpPost("AddFavoritePlace")]
+        public IActionResult AddFavoritePlace(FavouritePlacesDto request)
         {
             try
             {
-
                 _IFavoritePlaceService.MarkFavoritePlace(request);
-
-
-                return Ok("done");
+                return Ok("Favorite place added successfully.");
             }
             catch (Exception ex)
             {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
+        [HttpPost("RemoveFavoritePlace")]
+        public IActionResult RemoveFavoritePlace(FavouritePlacesDto request)
+        {
+            try
+            {
+                _IFavoritePlaceService.MarkFavoritePlace(request);
+                return Ok("Favorite place removed successfully.");
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
