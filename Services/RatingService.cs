@@ -91,7 +91,7 @@ namespace Guide_Me.Services
             return ["Not Found Suggestion For that Rate number"];
         }
 
-        public bool AddSuggestionChoosen(string suggestion, RatePlaceDto ratingDto)
+        public bool AddSuggestionChoosen(RatePlaceWithSuggDto ratingDto)
         {
             string touristID = _ITouristService.GetUserIdByUsername(ratingDto.touristName);
             int placeID = _IPlaceService.GetPlaceIdByPlaceName(ratingDto.placeName);
@@ -106,7 +106,7 @@ namespace Guide_Me.Services
                 {
                     _context.RatingSuggestions.Add(new RatingSuggestion
                     {
-                        Discription = suggestion,
+                        Discription = ratingDto.suggestion,
                         rateID = rate.RatingID,
                     });
 

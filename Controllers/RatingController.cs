@@ -58,10 +58,10 @@ namespace Guide_Me.Controllers
             }
         }
 
-        [HttpPost("{Suggestion}/Rating/Suggestion")]
-        public IActionResult AddSuggestionChosenByTourist(string Suggestion, RatePlaceDto request)
+        [HttpPost("/Rating/Suggestion")]
+        public IActionResult AddSuggestionChosenByTourist(RatePlaceWithSuggDto request)
         {
-            if(_ratingService.AddSuggestionChoosen(Suggestion, request)==true)
+            if(_ratingService.AddSuggestionChoosen(request)==true)
                 return Ok("Suggestion Saved");
             else
             { return BadRequest("Error in add suggestion rate"); }

@@ -7,6 +7,6 @@ namespace Guide_Me.Services
         bool RatePlace(RatePlaceDto ratePlaceDto);
         int GetOverAllRateOfPlace(string placeName);
         List<string> GetSuggestionsBasedOnRating(int ratenum);
-        bool AddSuggestionChoosen(string suggestion, RatePlaceDto ratingDto);
+        bool AddSuggestionChoosen(RatePlaceWithSuggDto ratingDto);
     }
 }
