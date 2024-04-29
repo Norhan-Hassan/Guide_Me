@@ -1,6 +1,7 @@
 ﻿using Guide_Me.DTO;
 using Guide_Me.Models;
 using Guide_Me.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RatingController : ControllerBase
     {
         private readonly IRatingService _ratingService;
@@ -56,7 +58,7 @@ namespace Guide_Me.Controllers
             }
         }
 
-        [HttpPost("Add Suggestion Rate Chosen By Tourist ")]
+        [HttpPost("{Suggestion}/Rating/Suggestion")]
         public IActionResult AddSuggestionChosenByTourist(string Suggestion, RatePlaceDto request)
         {
             if(_ratingService.AddSuggestionChoosen(Suggestion, request)==true)
