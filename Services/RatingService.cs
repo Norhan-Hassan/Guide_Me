@@ -12,11 +12,11 @@ namespace Guide_Me.Services
         private readonly ApplicationDbContext _context;
         public Dictionary<int, List<string>> suggestions = new Dictionary<int, List<string>>()
         {
-            {1, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Ineffective Communication","Lack Of Culture Sensitivity"] },
-            {2, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Effictive Safety","Ease Of Access"] },
-            {3, ["Poor Service Content","Cleanliness Concerns","OverCorowding","High Prices","Effictive Safety","Ease Of Access"] },
-            {4, ["Attractive Environment","Engaging Activity","Ease Of Access","Cleanliness Concerns","OverCorowding","High Prices"] },
-            {5, ["Attractive Environment","Engaging Activity","Ease Of Access","Effictive Safety","Culture Signficance","Sweet soul people"] }
+            {1, ["Poor Service Content","Cleanliness Concerns","OverCrowding","High Prices","Ineffective Communication","Lack Of Culture Sensitivity"] },
+            {2, ["Poor Service Content","Cleanliness Concerns","OverCrowding","High Prices","Effective Safety","Ease Of Access"] },
+            {3, ["Poor Service Content","Cleanliness Concerns","OverCrowding","High Prices","Effective Safety","Ease Of Access"] },
+            {4, ["Attractive Environment","Engaging Activity","Ease Of Access","Cleanliness Concerns","OverCrowding","High Prices"] },
+            {5, ["Attractive Environment","Engaging Activity","Ease Of Access","Effective Safety","Culture Signficance","Sweet soul people"] }
         };
         
         public RatingService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService)
@@ -102,13 +102,23 @@ namespace Guide_Me.Services
                     .Where(r => r.TouristId == touristID && r.PlaceId == placeID)
                     .FirstOrDefault();
 
-                if (rate != null && rate.Rate==ratingDto.ratingNum)
+                if (rate != null && rate.Rate == ratingDto.ratingNum)
                 {
-                    _context.RatingSuggestions.Add(new RatingSuggestion
+                    
+                    var existingSuggestions = _context.RatingSuggestions
+                        .Where(rs => rs.rateID == rate.RatingID)
+                        .ToList();
+
+                    _context.RatingSuggestions.RemoveRange(existingSuggestions);
+
+                    foreach (var suggest in ratingDto.suggestion)
                     {
-                        Discription = ratingDto.suggestion,
-                        rateID = rate.RatingID,
-                    });
+                        _context.RatingSuggestions.Add(new RatingSuggestion
+                        {
+                            Discription = suggest,
+                            rateID = rate.RatingID,
+                        });
+                    }
 
                     _context.SaveChanges();
                     return true;
@@ -117,5 +127,6 @@ namespace Guide_Me.Services
 
             return false;
         }
+
     }
 }
