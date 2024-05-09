@@ -130,6 +130,7 @@
 //}
 using Guide_Me.DTO;
 using Guide_Me.Models;
+using Guide_Me.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -153,12 +154,13 @@ namespace Guide_Me.Controllers
         private readonly UserManager<Tourist> _userManager;
         private readonly SignInManager<Tourist> _signInManager;
         private readonly IConfiguration _config;
-
-        public TouristController(UserManager<Tourist> userManager, SignInManager<Tourist> signInManager, IConfiguration config)
+        private readonly ITouristService _ITouristService;
+        public TouristController(UserManager<Tourist> userManager, SignInManager<Tourist> signInManager, IConfiguration config, ITouristService ITouristService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
+            _ITouristService = ITouristService;
         }
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp(TouristRegisterDto touristDto)
@@ -251,5 +253,45 @@ namespace Guide_Me.Controllers
             return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
         }
 
+        [HttpPut("update/{TouristName}")]
+        public async Task<IActionResult> UpdateTouristInfo(string TouristName, TouristInfoDto infoDto)
+        {
+            try
+            {
+                await _ITouristService.UpdateUserInfo(TouristName, infoDto);
+                return Ok("Tourist Data Updated Successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("GetTouristInfo/{TouristName}")]
+        public IActionResult GetTouristInfo(string TouristName)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var TouristInfo = _ITouristService.GetStudentInfo(TouristName);
+
+                if (TouristInfo != null)
+                {
+                    return Ok(TouristInfo);
+                }
+                else
+                {
+                    return Unauthorized("Invalid Tourist name");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }
