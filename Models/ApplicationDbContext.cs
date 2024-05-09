@@ -25,6 +25,7 @@ namespace Guide_Me.Models
         public DbSet<RatingSuggestion> RatingSuggestions { get; set; }
 
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Suggestionplacebyuser> Suggestionplacebyusers { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

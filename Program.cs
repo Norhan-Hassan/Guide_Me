@@ -36,7 +36,7 @@ namespace Guide_Me
             builder.Services.AddScoped<ITouristService, TouristService>();
             builder.Services.AddScoped<IRatingService, RatingService>();
             builder.Services.AddScoped<IReviewsService, ReviewsService>();
-
+            builder. Services.AddScoped<ISuggestionplacebyuserService, SuggestionplacebyuserService>();
             builder.Services.AddLogging(builder =>
             {
                 builder.AddConsole(); // or other logging providers
