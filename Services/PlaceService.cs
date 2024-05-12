@@ -85,17 +85,20 @@ namespace Guide_Me.Services
                     Name = place.PlaceName,
                     Category = place.Category,
                     Media = place.PlaceMedias != null
-                        ? place.PlaceMedias.Select(m => new PlaceMediaDto
-                        {
-                            MediaType = m.MediaType,
-                            MediaContent = m.MediaType.ToLower() == "text" ? m.MediaContent : GetMediaUrl(m.MediaContent)
-                        }).ToList()
+                        ? place.PlaceMedias
+                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
+                            .Select(m => new PlaceMediaDto
+                            {
+                                MediaType = m.MediaType,
+                                MediaContent = GetMediaUrl(m.MediaContent)
+                            }).ToList()
                         : new List<PlaceMediaDto>()
                 };
                 placeDtos.Add(placeDto);
             }
             return placeDtos;
         }
+
         public List<PlaceMediaDto> GetPlaceMedia(string placeName)
         {
             var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
