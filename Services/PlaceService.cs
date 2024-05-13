@@ -132,14 +132,7 @@ namespace Guide_Me.Services
             return placeMediaMap;
         }
 
-
-
-
-
-
-
-
-        private string GetMediaUrl(string mediaContent)
+        public string GetMediaUrl(string mediaContent)
         {
 
             var request = _httpContextAccessor.HttpContext.Request;

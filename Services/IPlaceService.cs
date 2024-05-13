@@ -9,7 +9,7 @@ namespace Guide_Me.Services
         List<PlaceItemDto> GetPlaceItems(string placeName);
         Task PostLocationAsync(string placeName, double latitude, double longitude);
         int GetPlaceIdByPlaceName(string placeName);
-
+        string GetMediaUrl(string mediaContent);
         public List<PlaceMediaDto> GetPlaceMedia(string placeName);
 
     }
