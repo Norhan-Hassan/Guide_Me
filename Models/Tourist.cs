@@ -7,7 +7,6 @@ namespace Guide_Me.Models
     public class Tourist : IdentityUser
     {
         public string Language { get; set; }
-        public string ImageUrl { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; }
         public virtual ICollection<History> histories { get; set; }
         public virtual ICollection<Rating> ratings { get; set; }

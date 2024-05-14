@@ -13,7 +13,7 @@ namespace Guide_Me.DTO
         public string newPass { get; set; }
 
         public string currentPass { get; set; }
-        public string ImageUrl { get; set; }
+        //public string ImageUrl { get; set; }
 
     }
 }

@@ -48,7 +48,7 @@ namespace Guide_Me.Services
                     userName = name,
                     email = tourist.Email,
                     language = tourist.Language,
-                    ImageUrl =_placeService.GetMediaUrl(tourist.ImageUrl),
+                   // ImageUrl =_placeService.GetMediaUrl(tourist.ImageUrl),
 
                 };
                 return touristInfo;
@@ -112,10 +112,10 @@ namespace Guide_Me.Services
                     throw new Exception("Failed to change password");
                 }
             }
-            if(!string.IsNullOrEmpty(infoDto.ImageUrl))
-            {
-                tourist.ImageUrl= infoDto.ImageUrl;
-            }
+            //if(!string.IsNullOrEmpty(infoDto.ImageUrl))
+            //{
+            //    tourist.ImageUrl= infoDto.ImageUrl;
+            //}
             await _context.SaveChangesAsync();
         }
 
