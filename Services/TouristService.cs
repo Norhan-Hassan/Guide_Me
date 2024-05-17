@@ -12,23 +12,23 @@ namespace Guide_Me.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<Tourist> _userManager;
         private readonly ApplicationDbContext _context;
-        private readonly IPlaceService _placeService;
-    
-        public TouristService(UserManager<Tourist> userManager,ApplicationDbContext context, IHttpContextAccessor httpContextAccessor,  IPlaceService placeService)
+
+        private readonly IWebHostEnvironment _hostingEnvironment;
+
+        public TouristService(UserManager<Tourist> userManager, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
-         
-            _placeService = placeService;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public string GetUserIdByUsername(string username)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserName == username);
-
             return user != null ? user.Id : null;
         }
+
         public string GetUserNameByUserId(string userId)
         {
             var users = _context.Users.Where(u => u.Id == userId).ToList();
@@ -42,21 +42,18 @@ namespace Guide_Me.Services
 
             if (tourist != null)
             {
-
                 var touristInfo = new TouristInfoProfileDto
                 {
                     userName = name,
                     email = tourist.Email,
                     language = tourist.Language,
-                   // ImageUrl =_placeService.GetMediaUrl(tourist.ImageUrl),
-
+                    PhotoUrl = string.IsNullOrEmpty(tourist.PhotoPath) ? null : $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(tourist.PhotoPath)}"
                 };
                 return touristInfo;
-
             }
             return null;
-
         }
+
         public async Task UpdateUserInfo(string Name, TouristInfoDto infoDto)
         {
             var tourist = await _context.Tourist.FirstOrDefaultAsync(t => t.UserName == Name);
@@ -70,7 +67,7 @@ namespace Guide_Me.Services
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.UserName == infoDto.userName && t.Id != tourist.Id);
                 if (checkExistUser != null)
                 {
-                    throw new Exception("Try another name , this name is already taken");
+                    throw new Exception("Try another name, this name is already taken");
                 }
 
                 tourist.UserName = infoDto.userName;
@@ -93,11 +90,6 @@ namespace Guide_Me.Services
 
             if (!string.IsNullOrEmpty(infoDto.newPass) && !string.IsNullOrEmpty(infoDto.currentPass))
             {
-                if (string.IsNullOrEmpty(infoDto.currentPass))
-                {
-                    throw new Exception("Current password is required to change the password");
-                }
-
                 // Verify the current password
                 var passwordCheck = await _userManager.CheckPasswordAsync(tourist, infoDto.currentPass);
                 if (!passwordCheck)
@@ -112,10 +104,29 @@ namespace Guide_Me.Services
                     throw new Exception("Failed to change password");
                 }
             }
-            //if(!string.IsNullOrEmpty(infoDto.ImageUrl))
-            //{
-            //    tourist.ImageUrl= infoDto.ImageUrl;
-            //}
+
+            // Handle the photo upload
+            if (infoDto.Photo != null && infoDto.Photo.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "photos");
+                var uniqueFileName = $"{Guid.NewGuid()}_{infoDto.Photo.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Ensure the uploads folder exists
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await infoDto.Photo.CopyToAsync(fileStream);
+                }
+
+                // Update the Tourist entity with the photo path
+                tourist.PhotoPath = Path.Combine("uploads", "photos", uniqueFileName);
+            }
+
             await _context.SaveChangesAsync();
         }
 

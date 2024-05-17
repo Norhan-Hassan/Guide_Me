@@ -2,6 +2,7 @@
 using Guide_Me.Models;
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -37,6 +38,10 @@ namespace Guide_Me
             builder.Services.AddScoped<IRatingService, RatingService>();
             builder.Services.AddScoped<IReviewsService, ReviewsService>();
             builder. Services.AddScoped<ISuggestionplacebyuserService, SuggestionplacebyuserService>();
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 104857600; // 100 MB
+            });
             builder.Services.AddLogging(builder =>
             {
                 builder.AddConsole(); // or other logging providers
@@ -109,7 +114,7 @@ namespace Guide_Me
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 //}
-
+                app.UseHttpsRedirection();
                 app.UseStaticFiles();
                 app.UseAuthentication();
                 app.UseAuthorization();

@@ -11,5 +11,6 @@ namespace Guide_Me.Models
         public virtual ICollection<History> histories { get; set; }
         public virtual ICollection<Rating> ratings { get; set; }
         public virtual ICollection<Review> reviews { get; set; }
+        public string? PhotoPath { get; set; }
     }
 }

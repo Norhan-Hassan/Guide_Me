@@ -11,7 +11,8 @@ namespace Guide_Me.DTO
         public string email { get; set; }
         [Required]
         public string language { get; set; }
-      
-     //   public string ImageUrl { get; set; }
+
+        public string PhotoUrl { get; set; }
+
     }
 }
