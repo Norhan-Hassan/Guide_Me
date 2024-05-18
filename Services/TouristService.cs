@@ -64,7 +64,6 @@ namespace Guide_Me.Services
                 throw new Exception("Tourist not found.");
             }
 
-            // Update UserName if provided
             if (!string.IsNullOrEmpty(infoDto.userName))
             {
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.UserName == infoDto.userName && t.Id != tourist.Id);
@@ -75,7 +74,6 @@ namespace Guide_Me.Services
                 tourist.UserName = infoDto.userName;
             }
 
-            // Update Email if provided
             if (!string.IsNullOrEmpty(infoDto.email))
             {
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.Email == infoDto.email && t.Id != tourist.Id);
@@ -86,20 +84,24 @@ namespace Guide_Me.Services
                 tourist.Email = infoDto.email;
             }
 
-            // Update Language if provided
             if (!string.IsNullOrEmpty(infoDto.language))
             {
                 tourist.Language = infoDto.language;
             }
 
-            // Update Password if both newPass and currentPass are provided
-            if (!string.IsNullOrEmpty(infoDto.newPass) && !string.IsNullOrEmpty(infoDto.currentPass))
+            if (!string.IsNullOrEmpty(infoDto.newPass) || !string.IsNullOrEmpty(infoDto.currentPass))
             {
+                if (string.IsNullOrEmpty(infoDto.newPass) || string.IsNullOrEmpty(infoDto.currentPass))
+                {
+                    throw new Exception("Both current password and new password are required to change password.");
+                }
+
                 var passwordCheck = await _userManager.CheckPasswordAsync(tourist, infoDto.currentPass);
                 if (!passwordCheck)
                 {
                     throw new Exception("Current password is incorrect");
                 }
+
                 var result = await _userManager.ChangePasswordAsync(tourist, infoDto.currentPass, infoDto.newPass);
                 if (!result.Succeeded)
                 {
@@ -107,7 +109,6 @@ namespace Guide_Me.Services
                 }
             }
 
-            // Update Photo if provided
             if (infoDto.Photo != null && infoDto.Photo.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "photos");
@@ -127,7 +128,6 @@ namespace Guide_Me.Services
                 tourist.PhotoPath = Path.Combine("uploads", "photos", uniqueFileName);
             }
 
-            // Save changes to the database
             await _context.SaveChangesAsync();
         }
 
