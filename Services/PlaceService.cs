@@ -63,13 +63,24 @@ namespace Guide_Me.Services
         }
 
 
-        public List<PlaceDto> GetPlaces(string CityName)
+        public List<PlaceDto> GetPlaces(string cityName, string touristName)
         {
-            var city = _context.Cities.FirstOrDefault(c => c.CityName == CityName);
+            var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
             if (city == null)
             {
                 return null;
             }
+
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            if (tourist == null)
+            {
+                return null;
+            }
+
+            var favoritePlaceIds = _context.Favorites
+                                      .Where(f => f.TouristID == tourist.Id)
+                                      .Select(f => f.PlaceID)
+                                      .ToList();
 
             var places = _context.Places
                          .Include(p => p.PlaceMedias)
@@ -92,7 +103,8 @@ namespace Guide_Me.Services
                                 MediaType = m.MediaType,
                                 MediaContent = GetMediaUrl(m.MediaContent)
                             }).ToList()
-                        : new List<PlaceMediaDto>()
+                        : new List<PlaceMediaDto>(),
+                    FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 // Check if place is a favorite
                 };
                 placeDtos.Add(placeDto);
             }
@@ -141,19 +153,20 @@ namespace Guide_Me.Services
         }
 
 
-        public async Task PostLocationAsync(string placeName, double latitude, double longitude)
+        public PlaceLocationDto GetLocation(string placeName)
         {
-            var place = await _context.Places.FirstOrDefaultAsync(p => p.PlaceName == placeName);
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
             if (place == null)
             {
                 throw new Exception("Place not found");
             }
             else
             {
-                place.latitude = latitude;
-                place.longitude = longitude;
+                var PlaceLocationDto = new PlaceLocationDto();
+                PlaceLocationDto.latitude = place.latitude;
+                PlaceLocationDto.longitude = place.longitude;
 
-                await _context.SaveChangesAsync();
+                return PlaceLocationDto;
             }
 
         }

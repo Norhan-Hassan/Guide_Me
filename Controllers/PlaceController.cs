@@ -17,13 +17,13 @@ namespace Guide_Me.Controllers
             _placeService = placeService;
         }
 
-        [HttpGet("{CityName}/Allplaces")]
-        public IActionResult GetPlacesByCity(string CityName)
+        [HttpGet("{CityName}/{TouristName}/Allplaces")]
+        public IActionResult GetPlacesByCity(string CityName, string TouristName)
         {
-            var places = _placeService.GetPlaces(CityName);
+            var places = _placeService.GetPlaces(CityName, TouristName);
             if (places == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
             return Ok(places);
@@ -39,14 +39,14 @@ namespace Guide_Me.Controllers
 
             return Ok(placeItems);
         }
-       
-        [HttpPost("{placeName}/places/location")]
-        public async Task<IActionResult> PostLocationByName(string placeName, double latitude, double longitude)
+
+        [HttpGet("{placeName}/places/location")]
+        public IActionResult PostLocationByName(string placeName)
         {
             try
             {
-                await _placeService.PostLocationAsync(placeName, latitude, longitude);
-                return Ok("Location updated successfully.");
+                var placeLocation = _placeService.GetLocation(placeName);
+                return Ok(placeLocation);
             }
             catch (Exception ex)
             {
