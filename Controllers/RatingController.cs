@@ -66,5 +66,18 @@ namespace Guide_Me.Controllers
             else
             { return BadRequest("Error in add suggestion rate"); }
         }
+        [HttpGet("/Rating/GetLatestRate")]
+        public IActionResult GetRate(string TouristName, string PlaceName)
+        {
+           int rateNum = _ratingService.GetLatestRateOfToursit(TouristName, PlaceName);
+           if (rateNum!=-1)
+           {
+                return Ok(rateNum);
+           }
+           else
+            {
+                return BadRequest("Tourist or place Not Found");
+            }
+        }
     }
 }

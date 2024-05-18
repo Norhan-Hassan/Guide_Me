@@ -90,6 +90,24 @@ namespace Guide_Me.Services
             }
             return ["Not Found Suggestion For that Rate number"];
         }
+        public int GetLatestRateOfToursit(string TouristName , string PlaceName)
+        {
+            string touristID = _ITouristService.GetUserIdByUsername(TouristName);
+            int placeID = _IPlaceService.GetPlaceIdByPlaceName(PlaceName);
+            if (placeID > 0 && touristID != null)
+            {
+                Rating rate = _context.Rating
+                    .Where(r => r.TouristId == touristID && r.PlaceId == placeID)
+                    .FirstOrDefault();
+
+                if(rate != null)
+                    return rate.Rate;
+                else
+                    return 0;
+            }
+            return -1;
+
+        }
 
         public bool AddSuggestionChoosen(RatePlaceWithSuggDto ratingDto)
         {
