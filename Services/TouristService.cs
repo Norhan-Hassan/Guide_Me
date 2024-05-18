@@ -2,8 +2,11 @@
 using Guide_Me.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Guide_Me.Services
 {
@@ -12,7 +15,6 @@ namespace Guide_Me.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<Tourist> _userManager;
         private readonly ApplicationDbContext _context;
-
         private readonly IWebHostEnvironment _hostingEnvironment;
 
         public TouristService(UserManager<Tourist> userManager, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostingEnvironment)
@@ -62,6 +64,7 @@ namespace Guide_Me.Services
                 throw new Exception("Tourist not found.");
             }
 
+            // Update UserName if provided
             if (!string.IsNullOrEmpty(infoDto.userName))
             {
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.UserName == infoDto.userName && t.Id != tourist.Id);
@@ -69,10 +72,10 @@ namespace Guide_Me.Services
                 {
                     throw new Exception("Try another name, this name is already taken");
                 }
-
                 tourist.UserName = infoDto.userName;
             }
 
+            // Update Email if provided
             if (!string.IsNullOrEmpty(infoDto.email))
             {
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.Email == infoDto.email && t.Id != tourist.Id);
@@ -83,21 +86,20 @@ namespace Guide_Me.Services
                 tourist.Email = infoDto.email;
             }
 
+            // Update Language if provided
             if (!string.IsNullOrEmpty(infoDto.language))
             {
                 tourist.Language = infoDto.language;
             }
 
+            // Update Password if both newPass and currentPass are provided
             if (!string.IsNullOrEmpty(infoDto.newPass) && !string.IsNullOrEmpty(infoDto.currentPass))
             {
-                // Verify the current password
                 var passwordCheck = await _userManager.CheckPasswordAsync(tourist, infoDto.currentPass);
                 if (!passwordCheck)
                 {
                     throw new Exception("Current password is incorrect");
                 }
-
-                // Change the password
                 var result = await _userManager.ChangePasswordAsync(tourist, infoDto.currentPass, infoDto.newPass);
                 if (!result.Succeeded)
                 {
@@ -105,14 +107,13 @@ namespace Guide_Me.Services
                 }
             }
 
-            // Handle the photo upload
+            // Update Photo if provided
             if (infoDto.Photo != null && infoDto.Photo.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "photos");
                 var uniqueFileName = $"{Guid.NewGuid()}_{infoDto.Photo.FileName}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                // Ensure the uploads folder exists
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
@@ -123,12 +124,15 @@ namespace Guide_Me.Services
                     await infoDto.Photo.CopyToAsync(fileStream);
                 }
 
-                // Update the Tourist entity with the photo path
                 tourist.PhotoPath = Path.Combine("uploads", "photos", uniqueFileName);
             }
 
+            // Save changes to the database
             await _context.SaveChangesAsync();
         }
+
+
+
 
     }
 }
