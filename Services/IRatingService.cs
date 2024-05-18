@@ -8,5 +8,6 @@ namespace Guide_Me.Services
         int GetOverAllRateOfPlace(string placeName);
         List<string> GetSuggestionsBasedOnRating(int ratenum);
         bool AddSuggestionChoosen(RatePlaceWithSuggDto ratingDto);
+        int GetLatestRateOfToursit(string TouristName, string PlaceName);
     }
 }
