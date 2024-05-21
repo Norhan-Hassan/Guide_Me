@@ -7,5 +7,6 @@ namespace Guide_Me.DTO
         public string touristName { get; set; }
         [Required(ErrorMessage = "Rating Number is required")]
         public string comment { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

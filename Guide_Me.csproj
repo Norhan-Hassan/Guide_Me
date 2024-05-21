@@ -36,6 +36,7 @@
     <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
     <Folder Include="wwwroot\cities\sharm\placeimage\" />
     <Folder Include="wwwroot\cities\sina\placeimage\" />
+    <Folder Include="wwwroot\uploads\photos\" />
   </ItemGroup>
 
 </Project>

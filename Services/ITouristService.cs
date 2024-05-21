@@ -8,5 +8,6 @@ namespace Guide_Me.Services
         string GetUserNameByUserId(string userId);
         TouristInfoProfileDto GetStudentInfo(string username);
         Task UpdateUserInfo(string Name, TouristInfoDto infoDto);
+        string GetUserPhotoByUserId(string userId);
     }
 }

@@ -37,6 +37,12 @@ namespace Guide_Me.Services
             var user = users.FirstOrDefault();
             return user != null ? user.UserName : null;
         }
+        public string GetUserPhotoByUserId(string userId)
+        {
+            var users = _context.Users.Where(u => u.Id == userId).ToList();
+            var user = users.FirstOrDefault();
+            return user != null ? user.PhotoPath : null;
+        }
 
         public TouristInfoProfileDto GetStudentInfo(string name)
         {
@@ -120,6 +126,15 @@ namespace Guide_Me.Services
                     Directory.CreateDirectory(uploadsFolder);
                 }
 
+                // Delete the old photo if it exists
+                if (!string.IsNullOrEmpty(tourist.PhotoPath))
+                {
+                    var oldFilePath = Path.Combine(_hostingEnvironment.WebRootPath, tourist.PhotoPath);
+                    if (File.Exists(oldFilePath))
+                    {
+                        File.Delete(oldFilePath);
+                    }
+                }
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await infoDto.Photo.CopyToAsync(fileStream);
@@ -130,9 +145,6 @@ namespace Guide_Me.Services
 
             await _context.SaveChangesAsync();
         }
-
-
-
 
     }
 }

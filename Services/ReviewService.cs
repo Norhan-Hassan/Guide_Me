@@ -11,11 +11,13 @@ namespace Guide_Me.Services
         private readonly IPlaceService _IPlaceService;
         private readonly ITouristService _ITouristService;
         private readonly ApplicationDbContext _context;
-        public ReviewsService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ReviewsService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _ITouristService = ITouristService;
             _IPlaceService = IPlaceService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public bool AddReviewOnPlace(ReviewPlaceDto reviewPlaceDto)
@@ -60,6 +62,7 @@ namespace Guide_Me.Services
                         {
                             comment = item.Comment,
                             touristName = _ITouristService.GetUserNameByUserId(item.TouristId),
+                            PhotoUrl= string.IsNullOrEmpty(_ITouristService.GetUserPhotoByUserId(item.TouristId)) ? null : $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(_ITouristService.GetUserPhotoByUserId(item.TouristId))}"
                         });
 
                     }
