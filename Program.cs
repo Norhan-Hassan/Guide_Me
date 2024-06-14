@@ -38,6 +38,7 @@ namespace Guide_Me
             builder.Services.AddScoped<IRatingService, RatingService>();
             builder.Services.AddScoped<IReviewsService, ReviewsService>();
             builder. Services.AddScoped<ISuggestionplacebyuserService, SuggestionplacebyuserService>();
+            builder.Services.AddScoped<IRecommendationService, RecommendationService>();
             builder.Services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 104857600; // 100 MB

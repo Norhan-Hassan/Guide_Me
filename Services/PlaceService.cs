@@ -152,7 +152,6 @@ namespace Guide_Me.Services
             return $"{baseUrl}/{mediaContent}";
         }
 
-
         public PlaceLocationDto GetLocation(string placeName)
         {
             var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
