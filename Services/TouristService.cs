@@ -70,6 +70,54 @@ namespace Guide_Me.Services
                 throw new Exception("Tourist not found.");
             }
 
+            // Check if a new photo is provided
+            if (infoDto.Photo != null && infoDto.Photo.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "photos");
+                var uniqueFileName = $"{Guid.NewGuid()}_{infoDto.Photo.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Delete the old photo if it exists
+                if (!string.IsNullOrEmpty(tourist.PhotoPath))
+                {
+                    var oldFilePath = Path.Combine(_hostingEnvironment.WebRootPath, tourist.PhotoPath);
+                    if (File.Exists(oldFilePath))
+                    {
+                        File.Delete(oldFilePath);
+                    }
+                }
+
+                // Save new photo
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await infoDto.Photo.CopyToAsync(fileStream);
+                }
+
+                tourist.PhotoPath = Path.Combine("uploads", "photos", uniqueFileName);
+
+                // Save changes to the database for photo update only
+                await _context.SaveChangesAsync();
+
+                return; // Exit early after updating the photo
+            }
+
+            // For other updates (username, email, language, password), require current password
+            if (string.IsNullOrEmpty(infoDto.currentPass))
+            {
+                throw new Exception("Current password is required to update information.");
+            }
+
+            var passwordCheck = await _userManager.CheckPasswordAsync(tourist, infoDto.currentPass);
+            if (!passwordCheck)
+            {
+                throw new Exception("Current password is incorrect");
+            }
+
             if (!string.IsNullOrEmpty(infoDto.userName))
             {
                 var checkExistUser = await _context.Tourist.FirstOrDefaultAsync(t => t.UserName == infoDto.userName && t.Id != tourist.Id);
@@ -95,19 +143,8 @@ namespace Guide_Me.Services
                 tourist.Language = infoDto.language;
             }
 
-            if (!string.IsNullOrEmpty(infoDto.newPass) || !string.IsNullOrEmpty(infoDto.currentPass))
+            if (!string.IsNullOrEmpty(infoDto.newPass))
             {
-                if (string.IsNullOrEmpty(infoDto.newPass) || string.IsNullOrEmpty(infoDto.currentPass))
-                {
-                    throw new Exception("Both current password and new password are required to change password.");
-                }
-
-                var passwordCheck = await _userManager.CheckPasswordAsync(tourist, infoDto.currentPass);
-                if (!passwordCheck)
-                {
-                    throw new Exception("Current password is incorrect");
-                }
-
                 var result = await _userManager.ChangePasswordAsync(tourist, infoDto.currentPass, infoDto.newPass);
                 if (!result.Succeeded)
                 {
@@ -115,36 +152,9 @@ namespace Guide_Me.Services
                 }
             }
 
-            if (infoDto.Photo != null && infoDto.Photo.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "photos");
-                var uniqueFileName = $"{Guid.NewGuid()}_{infoDto.Photo.FileName}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                // Delete the old photo if it exists
-                if (!string.IsNullOrEmpty(tourist.PhotoPath))
-                {
-                    var oldFilePath = Path.Combine(_hostingEnvironment.WebRootPath, tourist.PhotoPath);
-                    if (File.Exists(oldFilePath))
-                    {
-                        File.Delete(oldFilePath);
-                    }
-                }
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await infoDto.Photo.CopyToAsync(fileStream);
-                }
-
-                tourist.PhotoPath = Path.Combine("uploads", "photos", uniqueFileName);
-            }
-
             await _context.SaveChangesAsync();
         }
+
 
     }
 }
