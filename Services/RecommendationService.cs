@@ -1,5 +1,6 @@
 ﻿using Guide_Me.DTO;
 using Guide_Me.Models;
+using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Guide_Me.Services
@@ -23,7 +24,7 @@ namespace Guide_Me.Services
         {
             string touristID = _touristService.GetUserIdByUsername(touristName);
 
-            if (touristID != null)
+            if (!string.IsNullOrEmpty(touristID))
             {
                 var favPlaces = _context.Favorites
                                         .Where(f => f.TouristID == touristID && f.Place.City.CityName == cityName)
@@ -47,22 +48,29 @@ namespace Guide_Me.Services
 
                     var mostFrequentCategory = categoryCounts.FirstOrDefault()?.Category?.ToLower();
 
-                    if (mostFrequentCategory != null)
+                    if (!string.IsNullOrEmpty(mostFrequentCategory))
                     {
                         var allPlacesInCity = _context.Places
-                                                      .Where(p => p.City.CityName == cityName && p.Category == mostFrequentCategory)
+                                                      .Include(p => p.PlaceMedias) 
+                                                      .Where(p => p.City.CityName == cityName && p.Category.ToLower() == mostFrequentCategory)
                                                       .ToList();
 
                         var recommendedPlaces = allPlacesInCity
                                                  .Where(place => !favPlaces.Contains(place) && !histPlaces.Contains(place))
-                                                 .Select(place => new PlaceRecommendationDto
-                                                 {
-                                                     PlaceName = place.PlaceName,
-                                                     Image = _placeService.GetMediaUrl(
-                                                                           place.PlaceMedias
-                                                                                ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
-                                                                                ?.MediaContent),
-                                                     Rate = place.Ratings != null && place.Ratings.Any() ? place.Ratings.Average(r => r.Rate) : 0
+                                                 .Select(place => {
+                                                     var mediaContent = place.PlaceMedias
+                                                                             ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
+                                                                             ?.MediaContent;
+
+                                                     
+                                                     Console.WriteLine($"Place: {place.PlaceName}, Media Content: {mediaContent}");
+
+                                                     return new PlaceRecommendationDto
+                                                     {
+                                                         PlaceName = place.PlaceName,
+                                                         Image = _placeService.GetMediaUrl(mediaContent),
+                                                         Rate = place.Ratings != null && place.Ratings.Any() ? place.Ratings.Average(r => r.Rate) : 0
+                                                     };
                                                  })
                                                 .Take(3)
                                                 .ToList();
