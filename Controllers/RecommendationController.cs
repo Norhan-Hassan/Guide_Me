@@ -16,13 +16,13 @@ namespace Guide_Me.Controllers
 
         }
 
-        [HttpGet("GetRecommendationByPreference")]
-        public IActionResult GetRecommendationByPrefrences(string touristName, string cityName)
+        [HttpGet("GetRecommendations")]
+        public IActionResult GetRecommendationByPrefrences(string touristName, string cityName,double Latitude, double Longitude)
         {
-            if (_recommendationService.GetRecommendationByPreferences(touristName,cityName) != null)
+            if (_recommendationService.GetRecommendation(touristName, cityName, Latitude, Longitude) != null)
             {
 
-                return Ok(_recommendationService.GetRecommendationByPreferences(touristName,cityName));
+                return Ok(_recommendationService.GetRecommendation(touristName,cityName, Latitude, Longitude));
             }
             else
             {

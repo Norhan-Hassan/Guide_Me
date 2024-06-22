@@ -20,7 +20,7 @@ namespace Guide_Me.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public List<PlaceRecommendationDto> GetRecommendationByPreferences(string touristName, string cityName)
+        public  List<PlaceRecommendationDto> GetRecommendation(string touristName, string cityName , double Latitude, double Longitude)
         {
             string touristID = _touristService.GetUserIdByUsername(touristName);
 
@@ -35,6 +35,32 @@ namespace Guide_Me.Services
                                          .Where(h => h.TouristId == touristID && h.Place.City.CityName == cityName)
                                          .Select(h => h.Place)
                                          .ToList();
+                var nearestPlaces = _context.Places
+                               .Where(p => p.City.CityName == cityName)
+                               .Select(p => new
+                               {
+                                   Place = p,
+                                   Distance = 6371 * Math.Acos(
+                                       Math.Cos(Latitude * Math.PI / 180) * Math.Cos(p.latitude * Math.PI / 180) *
+                                       Math.Cos((p.longitude - Longitude) * Math.PI / 180) +
+                                       Math.Sin(Latitude * Math.PI / 180) * Math.Sin(p.latitude * Math.PI / 180))
+                               })
+                               .OrderBy(p => p.Distance)
+                               .Take(3)
+                               .ToList()
+                               .Select(p => new PlaceRecommendationDto
+                               {
+                                   PlaceName = p.Place.PlaceName,
+                                   Image = _placeService.GetMediaUrl(p.Place.PlaceMedias
+                                       ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
+                                       ?.MediaContent),
+                                   Rate = _context.Rating
+                                          .Where(r => r.PlaceId == p.Place.Id)
+                                           .Select(r => r.Rate)
+                                           .FirstOrDefault()
+                               })
+                               .ToList();
+
 
                 var commonPlaces = favPlaces.Concat(histPlaces).ToList();
 
@@ -69,12 +95,20 @@ namespace Guide_Me.Services
                                                      {
                                                          PlaceName = place.PlaceName,
                                                          Image = _placeService.GetMediaUrl(mediaContent),
-                                                         Rate = place.Ratings != null && place.Ratings.Any() ? place.Ratings.Average(r => r.Rate) : 0
+                                                         Rate = _context.Rating
+                                                            .Where(r => r.PlaceId == place.Id) 
+                                                            .Select(r => r.Rate)
+                                                            .FirstOrDefault()
                                                      };
                                                  })
                                                 .Take(3)
                                                 .ToList();
-                        return recommendedPlaces;
+                        var combinedPlaces = nearestPlaces.Concat(recommendedPlaces)
+                                             .GroupBy(p => p.PlaceName)
+                                             .Select(g => g.First()) 
+                                             .ToList();
+
+                        return combinedPlaces;
                     }
                 }
             }
@@ -83,7 +117,10 @@ namespace Guide_Me.Services
         }
 
 
-
+        private static double DegreeToRadian(double degree)
+        {
+            return degree * Math.PI / 180.0;
+        }
 
     }
 }

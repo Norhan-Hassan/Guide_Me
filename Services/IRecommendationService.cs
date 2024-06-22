@@ -4,6 +4,6 @@ namespace Guide_Me.Services
 {
     public interface IRecommendationService
     {
-        List<PlaceRecommendationDto> GetRecommendationByPreferences(string touristName, string cityName);
+         List<PlaceRecommendationDto> GetRecommendation(string touristName, string cityName, double lat, double lon);
     }
 }
