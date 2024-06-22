@@ -115,12 +115,5 @@ namespace Guide_Me.Services
 
             return null;
         }
-
-
-        private static double DegreeToRadian(double degree)
-        {
-            return degree * Math.PI / 180.0;
-        }
-
     }
 }
