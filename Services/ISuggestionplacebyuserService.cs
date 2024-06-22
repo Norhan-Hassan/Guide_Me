@@ -4,6 +4,6 @@ namespace Guide_Me.Services
 {
     public interface ISuggestionplacebyuserService
     {
-        Task SubmitSuggestionAsync(string placeName, string address, string touristname);
+        Task SubmitSuggestion(string placeName, string address, double? latitude, double? longitude, string touristname);
     }
 }

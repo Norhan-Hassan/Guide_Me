@@ -1,8 +1,7 @@
 ﻿using Guide_Me.DTO;
-using Guide_Me.Models; 
+using Guide_Me.Models;
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -22,11 +21,17 @@ namespace Guide_Me.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitSuggestion( string placeName,  string address, string touristName)
+        public async Task<IActionResult> SubmitSuggestion(string placeName, string? address, double? latitude, double? longitude, string touristName)
         {
             try
             {
-                await _suggestionService.SubmitSuggestionAsync(placeName, address, touristName);
+                // Ensure that either address or location (latitude and longitude) is provided
+                if (string.IsNullOrEmpty(address) && (!latitude.HasValue || !longitude.HasValue))
+                {
+                    return BadRequest("Either address or location (latitude and longitude) must be provided.");
+                }
+
+                await _suggestionService.SubmitSuggestion(placeName, address, latitude, longitude, touristName);
                 return Ok("Suggestion submitted successfully.");
             }
             catch (ArgumentException ex)
