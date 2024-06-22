@@ -113,7 +113,7 @@ namespace Guide_Me.Services
                 }
             }
 
-            return new List<PlaceRecommendationDto>();
+            return null;
         }
 
 
