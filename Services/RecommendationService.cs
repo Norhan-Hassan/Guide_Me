@@ -87,6 +87,7 @@ namespace Guide_Me.Services
 
                         var recommendedPlaces = allPlacesInCity
                                                  .Where(place => !favPlaces.Contains(place) && !histPlaces.Contains(place) && place.PlaceName != placeName)
+                                                 .OrderBy(p => Guid.NewGuid())
                                                  .Select(place => {
                                                      var mediaContent = place.PlaceMedias
                                                                              ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
