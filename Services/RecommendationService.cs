@@ -20,11 +20,12 @@ namespace Guide_Me.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public  List<PlaceRecommendationDto> GetRecommendation(string touristName, string cityName , double Latitude, double Longitude)
+        public  List<PlaceRecommendationDto> GetRecommendation(string touristName, string cityName , string placeName)
         {
             string touristID = _touristService.GetUserIdByUsername(touristName);
+            int placeId=_placeService.GetPlaceIdByPlaceName(placeName);
 
-            if (!string.IsNullOrEmpty(touristID))
+            if (!string.IsNullOrEmpty(touristID) && placeId != 0)
             {
                 var favPlaces = _context.Favorites
                                         .Where(f => f.TouristID == touristID && f.Place.City.CityName == cityName)
@@ -35,8 +36,11 @@ namespace Guide_Me.Services
                                          .Where(h => h.TouristId == touristID && h.Place.City.CityName == cityName)
                                          .Select(h => h.Place)
                                          .ToList();
+                double Latitude =_context.Places.Where(p => p.Id == placeId).Select(p => p.latitude).FirstOrDefault();
+                double Longitude = _context.Places.Where(p => p.Id == placeId).Select(p => p.longitude).FirstOrDefault();
+
                 var nearestPlaces = _context.Places
-                               .Where(p => p.City.CityName == cityName)
+                               .Where(p => p.City.CityName == cityName &&  p.PlaceName != placeName)
                                .Select(p => new
                                {
                                    Place = p,
@@ -82,7 +86,7 @@ namespace Guide_Me.Services
                                                       .ToList();
 
                         var recommendedPlaces = allPlacesInCity
-                                                 .Where(place => !favPlaces.Contains(place) && !histPlaces.Contains(place))
+                                                 .Where(place => !favPlaces.Contains(place) && !histPlaces.Contains(place) && place.PlaceName != placeName)
                                                  .Select(place => {
                                                      var mediaContent = place.PlaceMedias
                                                                              ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
@@ -103,10 +107,12 @@ namespace Guide_Me.Services
                                                  })
                                                 .Take(3)
                                                 .ToList();
-                        var combinedPlaces = nearestPlaces.Concat(recommendedPlaces)
+                        var combinedPlaces = recommendedPlaces.Concat(nearestPlaces)
+                                             .Where(c => c.PlaceName != placeName)
                                              .GroupBy(p => p.PlaceName)
                                              .Select(g => g.First()) 
                                              .ToList();
+                        
 
                         return combinedPlaces;
                     }
