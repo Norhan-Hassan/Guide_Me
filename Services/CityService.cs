@@ -7,13 +7,13 @@ namespace Guide_Me.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly BlobStorageService _blobStorageService;
-        public CityService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, BlobStorageService blobStorageService)
+        //private readonly BlobStorageService _blobStorageService;
+        public CityService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)//, BlobStorageService blobStorageService)
         {
            
             _context = context;
             _httpContextAccessor = httpContextAccessor;
-            _blobStorageService= blobStorageService;
+//_blobStorageService= blobStorageService;
         }
 
         public List<CityDto> GetAllCities()
@@ -28,8 +28,8 @@ namespace Guide_Me.Services
                 {
                     Id=city.Id,
                     Name = city.CityName,
-                    //CityImage = GetMediaUrl(city.CityImage),
-                    CityImage = GetBlobUrlmedia(city.CityImage),
+                    CityImage = GetMediaUrl(city.CityImage),
+                    //CityImage = GetBlobUrlmedia(city.CityImage),
 
                 };
                 cityDtos.Add(cityDto);
@@ -48,15 +48,15 @@ namespace Guide_Me.Services
             return $"{baseUrl}/{CityImage}";
         }
 
-        private string GetBlobUrlmedia(string CityImage)
-        {
-            // Replace this with actual container and blob name based on your storage structure
-            string containerName = "firstcontainer";
-            // Assuming CityImage is the blob name or a unique identifier for the blob
-            string blobName = CityImage;
-            // Call BlobStorageService to get the blob URL
-            return _blobStorageService.GetBlobUrl(containerName, blobName);
-        }
+        //private string GetBlobUrlmedia(string CityImage)
+        //{
+        //    // Replace this with actual container and blob name based on your storage structure
+        //    string containerName = "firstcontainer";
+        //    // Assuming CityImage is the blob name or a unique identifier for the blob
+        //    string blobName = CityImage;
+        //    // Call BlobStorageService to get the blob URL
+        //    return _blobStorageService.GetBlobUrl(containerName, blobName);
+        //}
 
     }
 }
