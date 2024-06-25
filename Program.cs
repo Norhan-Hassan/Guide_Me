@@ -30,6 +30,7 @@ namespace Guide_Me
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddIdentity<Tourist, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
             builder.Services.AddScoped<ICityService, CityService>();
             builder.Services.AddScoped<IPlaceService, PlaceService>();
             builder.Services.AddScoped<IHistoryService, HistoryService>();
