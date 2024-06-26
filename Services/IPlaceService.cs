@@ -10,7 +10,9 @@ namespace Guide_Me.Services
         PlaceLocationDto GetLocation(string placeName);
         int GetPlaceIdByPlaceName(string placeName);
         string GetMediaUrl(string mediaContent);
-        public List<PlaceMediaDto> GetPlaceMedia(string placeName);
+        List<PlaceMediaDto> GetPlaceMedia(string placeName);
+
+        SearchPlaceDto SerachPlace(string placeName, string cityName);
 
     }
 }

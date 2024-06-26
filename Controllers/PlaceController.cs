@@ -1,4 +1,5 @@
-﻿using Guide_Me.Services;
+﻿using Guide_Me.Models;
+using Guide_Me.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -65,6 +66,19 @@ namespace Guide_Me.Controllers
 
             return Ok(placeMedia);
         }
+       
+        [HttpGet]
+        [Route("{placeName}/{cityName}/SearchPlace")]
+        public IActionResult SearchPlace(string placeName , string cityName)
+        {
+            var place = _placeService.SerachPlace(placeName, cityName);
+            if(place == null)
+            {
+                return NotFound($"Place with name '{placeName}' is not found.");
+            }
+
+            return Ok(place);
+       }
 
     }
 }

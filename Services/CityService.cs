@@ -28,8 +28,8 @@ namespace Guide_Me.Services
                 {
                     Id=city.Id,
                     Name = city.CityName,
-                   // CityImage = GetMediaUrl(city.CityImage),
-                    CityImage = GetBlobUrlmedia(city.CityImage),
+                    CityImage = GetMediaUrl(city.CityImage),
+                    //CityImage = GetBlobUrlmedia(city.CityImage),
 
                 };
                 cityDtos.Add(cityDto);

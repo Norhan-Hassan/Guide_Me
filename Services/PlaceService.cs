@@ -176,6 +176,24 @@ namespace Guide_Me.Services
             return place != null ? place.Id : 0;
         }
 
+        public SearchPlaceDto SerachPlace(string placeName , string cityName)
+        {
+            int placeid = GetPlaceIdByPlaceName(placeName);
+            if(placeid > 0)
+            {
+                var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName && p.City.CityName == cityName);
+                var placeMedia = _context.placeMedias.FirstOrDefault(pm => pm.PlaceId == place.Id && pm.MediaType == "image");
+
+                var placeDto = new SearchPlaceDto
+                {
+                    placeName = placeName,
+                    placeImage = placeMedia != null ? GetMediaUrl(placeMedia.MediaContent) : null
+
+                };
+                return placeDto;
+            }
+            return null;
+        }
 
     }
 }
