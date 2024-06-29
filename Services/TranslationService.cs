@@ -9,6 +9,7 @@ namespace Guide_Me.Services
         private readonly string _endpoint;
         private readonly string _SubscriptionKey;
         private readonly string _region;
+        private readonly ITouristService _touristService;
 
         public TranslationService(IConfiguration configuration)
         {
@@ -21,6 +22,7 @@ namespace Guide_Me.Services
 
         public async Task<string> TranslateTextAsync(string text, string targetLanguage)
         {
+
             var client = new RestClient(_endpoint);
             var request = new RestRequest("/translate?api-version=3.0&to=" + targetLanguage, Method.Post);
             request.AddHeader("Ocp-Apim-Subscription-Key", _SubscriptionKey);

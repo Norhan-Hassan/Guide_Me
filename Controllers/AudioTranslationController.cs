@@ -1,4 +1,5 @@
 ﻿
+using Guide_Me.Models;
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,58 +15,74 @@ namespace AudioTranslation.Controllers
         private readonly ITranslationService _translationService;
         private readonly ITextToSpeechService _textToSpeechService;
         private readonly ILogger<AudioTranslationController> _logger;
+        private readonly ITouristService _touristService;
+        private readonly ApplicationDbContext _context;
 
         public AudioTranslationController(
             IAudioTranscriptionService audioTranscriptionService,
             ITranslationService translationService,
             ITextToSpeechService textToSpeechService,
-            ILogger<AudioTranslationController> logger)
+            ILogger<AudioTranslationController> logger,
+            ITouristService touristService,
+            ApplicationDbContext applicationDbContext)
         {
             _audioTranscriptionService = audioTranscriptionService;
             _translationService = translationService;
             _textToSpeechService = textToSpeechService;
             _logger = logger;
+            _touristService = touristService;
+            _context = applicationDbContext;
         }
-        [HttpPost("translate-audio/{placeName}")]
-        public async Task<IActionResult> TranslateAudio(string placeName, [FromForm] string targetLanguage)
+        [HttpPost("translate-audio/{placeName}/{touristName}")]
+        public async Task<IActionResult> TranslateAudio(string placeName,  string touristName)
         {
             try
             {
-                // Step 1: Transcribe the audio file
-                string transcriptionResult = await _audioTranscriptionService.TranscribeSingleAudioFileAsync(placeName);
-                if (transcriptionResult.StartsWith("Error"))
+                string touristID= _touristService.GetUserIdByUsername(touristName);
+                if (touristID != null)
                 {
-                    _logger.LogError($"Error during transcription: {transcriptionResult}");
-                    return StatusCode(500, transcriptionResult);
-                }
+                    string targetLanguage = _context.Tourist.Where(t => t.Id == touristID).FirstOrDefault()?.Language;
 
-                // Extract raw text from transcription result if necessary
-                string transcribedText = ExtractRawText(transcriptionResult);
+                    // Step 1: Transcribe the audio file
+                    string transcriptionResult = await _audioTranscriptionService.TranscribeSingleAudioFileAsync(placeName);
+                    if (transcriptionResult.StartsWith("Error"))
+                    {
+                        _logger.LogError($"Error during transcription: {transcriptionResult}");
+                        return StatusCode(500, transcriptionResult);
+                    }
 
-                // Step 2: Translate the transcribed text
-                string translationResult = await _translationService.TranslateTextAsync(transcribedText, targetLanguage);
-                if (translationResult == null)
-                {
-                    _logger.LogError($"Error during translation: {transcriptionResult}");
-                    return StatusCode(500, "Translation error.");
-                }
+                    // Extract raw text from transcription result if necessary
+                    string transcribedText = ExtractRawText(transcriptionResult);
 
-                // Extract translated text from translation result if necessary
-                string translatedText = ExtractTranslatedText(translationResult);
+                    // Step 2: Translate the transcribed text
+                    string translationResult = await _translationService.TranslateTextAsync(transcribedText, targetLanguage);
+                    if (translationResult == null)
+                    {
+                        _logger.LogError($"Error during translation: {transcriptionResult}");
+                        return StatusCode(500, "Translation error.");
+                    }
 
-                // Step 3: Convert the translated text to speech
-                string audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioPath);
+                    // Extract translated text from translation result if necessary
+                    string translatedText = ExtractTranslatedText(translationResult);
 
-                if (System.IO.File.Exists(filePath))
-                {
-                    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                    return File(bytes, "audio/mp3", Path.GetFileName(filePath));
+                    // Step 3: Convert the translated text to speech
+                    string audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioPath);
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                        return File(bytes, "audio/mp3", Path.GetFileName(filePath));
+                    }
+                    else
+                    {
+                        _logger.LogError($"File not found: {filePath}");
+                        return NotFound();
+                    }
                 }
                 else
                 {
-                    _logger.LogError($"File not found: {filePath}");
-                    return NotFound();
+                    return NotFound($"This touristName {touristName} doesn't exist");
                 }
             }
             catch (Exception ex)
