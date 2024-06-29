@@ -4,5 +4,7 @@
     {
         Task<string> TranslateTextAsync(string text, string targetLanguage);
         Task<string> TranslatedataAsync(string text, string targetLanguage);
+        string TranslateTextResultASync(string text, string targetLanguage);
+       
     }
 }

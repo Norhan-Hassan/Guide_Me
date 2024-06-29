@@ -30,7 +30,7 @@ namespace Guide_Me.Services
             foreach (var city in cities)
             {
                 // Translate city name
-                string translatedCityName = _translationService.TranslateTextAsync(city.CityName, targetLanguage).Result;
+                string translatedCityName = _translationService.TranslateTextResultASync(city.CityName, targetLanguage);
 
                 CityDto cityDto = new CityDto
                 {

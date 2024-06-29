@@ -97,8 +97,8 @@ namespace Guide_Me.Services
 
             foreach (var place in places)
             {
-                var translatedName = _translationService.TranslateTextAsync(place.PlaceName, preferredLanguage).Result; // Use .Result to get the synchronous result
-                var translatedCategory = _translationService.TranslateTextAsync(place.Category, preferredLanguage).Result;
+                var translatedName = _translationService.TranslateTextResultASync(place.PlaceName, preferredLanguage); // Use .Result to get the synchronous result
+                var translatedCategory = _translationService.TranslateTextResultASync(place.Category, preferredLanguage);
 
                 var placeDto = new PlaceDto
                 {
@@ -205,6 +205,7 @@ namespace Guide_Me.Services
             }
             return null;
         }
+        
 
     }
 }

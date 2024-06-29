@@ -56,5 +56,9 @@ namespace Guide_Me.Services
                 throw new Exception("Translation API call failed: " + response.ErrorMessage);
             }
         }
+        public string TranslateTextResultASync(string text, string targetLanguage)
+        {
+            return TranslatedataAsync(text, targetLanguage).Result;
+        }
     }
 }
