@@ -10,15 +10,19 @@ namespace Guide_Me.Services
 {
     public class PlaceService : IPlaceService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ApplicationDbContext _context;
-        public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
-        {
-            _context = context;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        
+            private readonly ApplicationDbContext _context;
+            private readonly IHttpContextAccessor _httpContextAccessor;
+            private readonly ITranslationService _translationService;
 
-        public List<PlaceItemDto> GetPlaceItems(string placeName)
+            public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITranslationService translationService)
+            {
+                _context = context;
+                _httpContextAccessor = httpContextAccessor;
+                _translationService = translationService;
+            }
+
+            public List<PlaceItemDto> GetPlaceItems(string placeName)
         {
             var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
             var placeItemsMap = new List<PlaceItemDto>();
@@ -68,48 +72,55 @@ namespace Guide_Me.Services
             var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
             if (city == null)
             {
-                return null;
+                return null; // or handle appropriately
             }
 
             var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
             if (tourist == null)
             {
-                return null;
+                return null; // or handle appropriately
             }
 
+            var preferredLanguage = tourist.Language;
+
             var favoritePlaceIds = _context.Favorites
-                                      .Where(f => f.TouristID == tourist.Id)
-                                      .Select(f => f.PlaceID)
-                                      .ToList();
+                                          .Where(f => f.TouristID == tourist.Id)
+                                          .Select(f => f.PlaceID)
+                                          .ToList();
 
             var places = _context.Places
-                         .Include(p => p.PlaceMedias)
-                         .Where(p => p.CityId == city.Id)
-                         .ToList();
+                                .Include(p => p.PlaceMedias)
+                                .Where(p => p.CityId == city.Id)
+                                .ToList();
 
             List<PlaceDto> placeDtos = new List<PlaceDto>();
 
             foreach (var place in places)
             {
-                PlaceDto placeDto = new PlaceDto
+                var translatedName = _translationService.TranslateTextAsync(place.PlaceName, preferredLanguage).Result; // Use .Result to get the synchronous result
+                var translatedCategory = _translationService.TranslateTextAsync(place.Category, preferredLanguage).Result;
+
+                var placeDto = new PlaceDto
                 {
-                    Name = place.PlaceName,
-                    Category = place.Category,
-                    Media = place.PlaceMedias != null
-                        ? place.PlaceMedias
-                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
-                            .Select(m => new PlaceMediaDto
-                            {
-                                MediaType = m.MediaType,
-                                MediaContent = GetMediaUrl(m.MediaContent)
-                            }).ToList()
-                        : new List<PlaceMediaDto>(),
+                    Name = translatedName,
+                    Category = translatedCategory,
+                    Media = place.PlaceMedias?
+                           .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
+                           .Select(m => new PlaceMediaDto
+                           {
+                               MediaType = m.MediaType,
+                               MediaContent = GetMediaUrl(m.MediaContent)
+                           })
+                           .ToList() ?? new List<PlaceMediaDto>(),
                     FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 // Check if place is a favorite
                 };
+
                 placeDtos.Add(placeDto);
             }
+
             return placeDtos;
         }
+
 
         public List<PlaceMediaDto> GetPlaceMedia(string placeName)
         {

@@ -19,8 +19,10 @@ namespace Guide_Me.Controllers
         }
 
         [HttpGet("{CityName}/{TouristName}/Allplaces")]
-        public IActionResult GetPlacesByCity(string CityName, string TouristName)
+
+        public async Task<IActionResult> GetPlaces(string CityName, string TouristName)
         {
+
             var places = _placeService.GetPlaces(CityName, TouristName);
             if (places == null)
             {
@@ -66,19 +68,19 @@ namespace Guide_Me.Controllers
 
             return Ok(placeMedia);
         }
-       
+
         [HttpGet]
         [Route("{placeName}/{cityName}/SearchPlace")]
-        public IActionResult SearchPlace(string placeName , string cityName)
+        public IActionResult SearchPlace(string placeName, string cityName)
         {
             var place = _placeService.SerachPlace(placeName, cityName);
-            if(place == null)
+            if (place == null)
             {
                 return NotFound($"Place with name '{placeName}' is not found.");
             }
 
             return Ok(place);
-       }
+        }
 
     }
 }

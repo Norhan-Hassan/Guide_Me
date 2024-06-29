@@ -7,13 +7,11 @@ namespace Guide_Me.Services
     {
         List<PlaceDto> GetPlaces(string cityName, string touristName);
         List<PlaceItemDto> GetPlaceItems(string placeName);
-        PlaceLocationDto GetLocation(string placeName);
-        int GetPlaceIdByPlaceName(string placeName);
-        string GetMediaUrl(string mediaContent);
         List<PlaceMediaDto> GetPlaceMedia(string placeName);
-
+        string GetMediaUrl(string mediaContent);
+        PlaceLocationDto GetLocation(string placeName);
+        int GetPlaceIdByPlaceName(string Placename);
         SearchPlaceDto SerachPlace(string placeName, string cityName);
-
     }
 }
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace Guide_Me.Controllers
 {
@@ -19,16 +20,29 @@ namespace Guide_Me.Controllers
 
         [HttpGet]
         [Route("AllCities")]
-        public IActionResult GetAllCities()
+        public IActionResult GetAllCities([FromQuery] string targetLanguage)
         {
-            var cities = _cityService.GetAllCities();
+            if (string.IsNullOrEmpty(targetLanguage))
+            {
+                // Set a default language if necessary
+                targetLanguage = "en"; // English as default
+            }
+
+            var cities = _cityService.GetAllCities(targetLanguage);
             return Ok(cities);
         }
+
         [HttpGet]
         [Route("SearchCity/{cityName}")]
-        public IActionResult SearchCity(string cityName)
+        public IActionResult SearchCity(string cityName, [FromQuery] string targetLanguage)
         {
-            var city = _cityService.GetAllCities().FirstOrDefault(c => c.Name.ToLower() == cityName.ToLower());
+            if (string.IsNullOrEmpty(targetLanguage))
+            {
+                // Set a default language if necessary
+                targetLanguage = "en"; // English as default
+            }
+
+            var city = _cityService.GetAllCities(targetLanguage).FirstOrDefault(c => c.Name.ToLower() == cityName.ToLower());
             if (city != null)
             {
                 return Ok(city);
@@ -37,4 +51,3 @@ namespace Guide_Me.Controllers
         }
     }
 }
-

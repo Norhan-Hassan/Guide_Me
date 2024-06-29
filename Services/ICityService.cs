@@ -5,6 +5,6 @@ namespace Guide_Me.Services
 {
     public interface ICityService
     {
-        List<CityDto> GetAllCities();
+        List<CityDto> GetAllCities(string targetLanguage);
     }
 }

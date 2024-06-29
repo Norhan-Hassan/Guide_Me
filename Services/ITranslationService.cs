@@ -3,5 +3,6 @@
     public interface ITranslationService
     {
         Task<string> TranslateTextAsync(string text, string targetLanguage);
+        Task<string> TranslatedataAsync(string text, string targetLanguage);
     }
 }
