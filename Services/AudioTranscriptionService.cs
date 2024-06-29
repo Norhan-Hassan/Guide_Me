@@ -18,14 +18,20 @@ namespace Guide_Me.Services
         private readonly ILogger<AudioTranscriptionService> _logger;
         private readonly IPlaceService _placeService;
 
-        public AudioTranscriptionService(ApplicationDbContext context, IOptions<AzureSpeechSettings> azureSpeechSettings, ILogger<AudioTranscriptionService> logger, IPlaceService placeService)
+
+        public AudioTranscriptionService(
+            ApplicationDbContext context,
+            IOptions<AzureSpeechSettings> azureSpeechSettings,
+            ILogger<AudioTranscriptionService> logger, 
+            IPlaceService placeService)
         {
             _context = context;
             _azureSpeechSettings = azureSpeechSettings.Value;
             _logger = logger;
             _placeService = placeService;
         }
-
+        
+        
         public async Task<string> TranscribeAudioAsync(string audioFilePath)
         {
             if (!File.Exists(audioFilePath))
