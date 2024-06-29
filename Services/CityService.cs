@@ -44,7 +44,25 @@ namespace Guide_Me.Services
 
             return cityDtos;
         }
+        public CityDto GetCityByName(string cityName, string targetLanguage)
+        {
+            var city = _context.Cities.FirstOrDefault(c => c.CityName.ToLower() == cityName.ToLower());
+            if (city != null)
+            {
+                // Translate city name
+                string translatedCityName = _translationService.TranslateTextResultASync(city.CityName, targetLanguage);
 
+                CityDto cityDto = new CityDto
+                {
+                    Id = city.Id,
+                    Name = translatedCityName,
+                    CityImage = GetMediaUrl(city.CityImage),
+                };
+
+                return cityDto;
+            }
+            return null; 
+        }
         private string GetMediaUrl(string cityImage)
         {
             var request = _httpContextAccessor.HttpContext.Request;

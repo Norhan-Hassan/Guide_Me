@@ -8,7 +8,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class CityController : ControllerBase
     {
         private readonly ICityService _cityService;
@@ -42,12 +42,13 @@ namespace Guide_Me.Controllers
                 targetLanguage = "en"; // English as default
             }
 
-            var city = _cityService.GetAllCities(targetLanguage).FirstOrDefault(c => c.Name.ToLower() == cityName.ToLower());
+            var city = _cityService.GetCityByName(cityName, targetLanguage);
             if (city != null)
             {
                 return Ok(city);
             }
             return NotFound($"City with name '{cityName}' not found.");
         }
+
     }
 }
