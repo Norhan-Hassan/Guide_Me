@@ -1,4 +1,6 @@
 ﻿using Azure.Storage.Blobs;
+using Microsoft.Extensions.Options;
+using Guide_Me.Models;
 
 namespace Guide_Me.Services
 {
@@ -17,5 +19,6 @@ namespace Guide_Me.Services
             var blobClient = containerClient.GetBlobClient(blobName);
             return blobClient.Uri.ToString();
         }
+
     }
 }

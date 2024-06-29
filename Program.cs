@@ -40,6 +40,12 @@ namespace Guide_Me
             builder.Services.AddScoped<IReviewsService, ReviewsService>();
             builder. Services.AddScoped<ISuggestionplacebyuserService, SuggestionplacebyuserService>();
             builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+            builder.Services.Configure<AzureSpeechSettings>(builder.Configuration.GetSection("AzureSpeech"));
+            builder.Services.Configure<TranslatorTextSettings>(builder.Configuration.GetSection("TranslatorText"));
+            builder.Services.Configure<TextToSpeechSettings>(builder.Configuration.GetSection("AzureSpeech"));
+            builder.Services.AddScoped<IAudioTranscriptionService, AudioTranscriptionService>();
+            builder.Services.AddScoped<ITranslationService, TranslationService>();
+            builder.Services.AddSingleton<ITextToSpeechService, TextToSpeechService>();
             builder.Services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 104857600; // 100 MB
