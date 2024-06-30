@@ -23,48 +23,48 @@ namespace Guide_Me.Services
             }
 
             public List<PlaceItemDto> GetPlaceItems(string placeName)
-        {
-            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
-            var placeItemsMap = new List<PlaceItemDto>();
-
-            if (place != null)
             {
+                var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
+                var placeItemsMap = new List<PlaceItemDto>();
 
-                var placeItems = _context.placeItem
-                    .Include(p => p.PlaceItemMedias)
-                    .Where(pi => pi.placeID == place.Id)
-                    .ToList();
-
-                foreach (var placeItem in placeItems)
+                if (place != null)
                 {
-                    PlaceWithoutMediaDto placeDto = new PlaceWithoutMediaDto
+
+                    var placeItems = _context.placeItem
+                        .Include(p => p.PlaceItemMedias)
+                        .Where(pi => pi.placeID == place.Id)
+                        .ToList();
+
+                    foreach (var placeItem in placeItems)
                     {
-                        Name = place.PlaceName,
-                        Category = place.Category,
+                        PlaceWithoutMediaDto placeDto = new PlaceWithoutMediaDto
+                        {
+                            Name = place.PlaceName,
+                            Category = place.Category,
 
-                    };
+                        };
 
-                    var placeItemDto = new PlaceItemDto
-                    {
-                        ID = placeItem.ID,
-                        placeItemName = placeItem.placeItemName,
-                        Media = placeItem.PlaceItemMedias != null ?
-                         placeItem.PlaceItemMedias.Select(media => new ItemMediaDto
-                         {
-                             MediaContent = media.MediaContent,
-                             MediaType = media.MediaType,
-                         })
-                         .ToList()
-                         : new List<ItemMediaDto>()
+                        var placeItemDto = new PlaceItemDto
+                        {
+                            ID = placeItem.ID,
+                            placeItemName = placeItem.placeItemName,
+                            Media = placeItem.PlaceItemMedias != null ?
+                             placeItem.PlaceItemMedias.Select(media => new ItemMediaDto
+                             {
+                                 MediaContent = media.MediaContent,
+                                 MediaType = media.MediaType,
+                             })
+                             .ToList()
+                             : new List<ItemMediaDto>()
 
-                    };
+                        };
 
-                    placeItemsMap.Add(placeItemDto);
+                        placeItemsMap.Add(placeItemDto);
+                    }
                 }
-            }
 
-            return placeItemsMap;
-        }
+                return placeItemsMap;
+            }
 
 
         public List<PlaceDto> GetPlaces(string cityName, string touristName)
@@ -72,13 +72,13 @@ namespace Guide_Me.Services
             var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
             if (city == null)
             {
-                return null; // or handle appropriately
+                return null; 
             }
 
             var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
             if (tourist == null)
             {
-                return null; // or handle appropriately
+                return null; 
             }
 
             var preferredLanguage = tourist.Language;
@@ -97,13 +97,19 @@ namespace Guide_Me.Services
 
             foreach (var place in places)
             {
-                var translatedName = _translationService.TranslateTextResultASync(place.PlaceName, preferredLanguage); // Use .Result to get the synchronous result
-                var translatedCategory = _translationService.TranslateTextResultASync(place.Category, preferredLanguage);
+                string placeNameToUse = place.PlaceName;
+                string categoryToUse = place.Category;
+
+                if (preferredLanguage != "en")
+                {
+                    placeNameToUse = _translationService.TranslateTextResultASync(place.PlaceName, preferredLanguage);
+                    categoryToUse = _translationService.TranslateTextResultASync(place.Category, preferredLanguage);
+                }
 
                 var placeDto = new PlaceDto
                 {
-                    Name = translatedName,
-                    Category = translatedCategory,
+                    Name = placeNameToUse,
+                    Category = categoryToUse,
                     Media = place.PlaceMedias?
                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
                            .Select(m => new PlaceMediaDto
@@ -112,7 +118,7 @@ namespace Guide_Me.Services
                                MediaContent = GetMediaUrl(m.MediaContent)
                            })
                            .ToList() ?? new List<PlaceMediaDto>(),
-                    FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 // Check if place is a favorite
+                    FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 
                 };
 
                 placeDtos.Add(placeDto);
