@@ -19,30 +19,26 @@ namespace Guide_Me.Controllers
         }
 
         [HttpGet]
-        [Route("AllCities")]
-        public IActionResult GetAllCities([FromQuery] string targetLanguage)
+        [Route("AllCities/{touristName}")]
+        public IActionResult GetAllCities(string touristName)
         {
-            if (string.IsNullOrEmpty(targetLanguage))
+            var cities = _cityService.GetAllCities(touristName);
+            if(cities != null)
             {
-                // Set a default language if necessary
-                targetLanguage = "en"; // English as default
+                return Ok(cities);
             }
-
-            var cities = _cityService.GetAllCities(targetLanguage);
-            return Ok(cities);
+            else
+            {
+                return BadRequest($"Tourist Name {touristName} is not found");
+            }
+            
         }
 
         [HttpGet]
-        [Route("SearchCity/{cityName}")]
-        public IActionResult SearchCity(string cityName, [FromQuery] string targetLanguage)
+        [Route("SearchCity/{cityName}/{touristName}")]
+        public IActionResult SearchCity(string cityName, string touristName)
         {
-            if (string.IsNullOrEmpty(targetLanguage))
-            {
-                // Set a default language if necessary
-                targetLanguage = "en"; // English as default
-            }
-
-            var city = _cityService.GetCityByName(cityName, targetLanguage);
+            var city = _cityService.GetCityByName(cityName, touristName);
             if (city != null)
             {
                 return Ok(city);
