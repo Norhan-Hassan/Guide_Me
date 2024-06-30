@@ -33,15 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\cities\aswan\placeimage\" />
-    <Folder Include="wwwroot\cities\fayoum\placeimage\" />
-    <Folder Include="wwwroot\cities\giza\Historical\" />
-    <Folder Include="wwwroot\cities\giza\Entertainment\" />
-    <Folder Include="wwwroot\cities\giza\Religious\" />
-    <Folder Include="wwwroot\cities\hurg\placeimage\" />
-    <Folder Include="wwwroot\cities\marsamatrouh\placeimage\" />
-    <Folder Include="wwwroot\cities\sharm\placeimage\" />
-    <Folder Include="wwwroot\cities\sina\placeimage\" />
     <Folder Include="wwwroot\uploads\photos\" />
   </ItemGroup>
 
