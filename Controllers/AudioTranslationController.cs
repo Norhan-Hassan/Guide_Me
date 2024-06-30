@@ -2,6 +2,7 @@
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace AudioTranslation.Controllers
@@ -32,6 +33,7 @@ namespace AudioTranslation.Controllers
             _touristService = touristService;
             _context = applicationDbContext;
         }
+
         [HttpPost("translate-audio/{placeName}/{touristName}")]
         public async Task<IActionResult> TranslateAudio(string placeName, string touristName)
         {
@@ -53,25 +55,45 @@ namespace AudioTranslation.Controllers
                     // Extract raw text from transcription result if necessary
                     string transcribedText = ExtractRawText(transcriptionResult);
 
-                    // Step 2: Translate the transcribed text
-                    string translationResult = await _translationService.TranslateTextAsync(transcribedText, targetLanguage);
-                    if (translationResult == null)
+                    string audioPath;
+                    if (targetLanguage == "en")
                     {
-                        _logger.LogError($"Error during translation: {transcriptionResult}");
-                        return StatusCode(500, "Translation error.");
+                        // Fetch the original audio file from PlaceMedias
+                        var place = await _context.Places.Include(p => p.PlaceMedias)
+                                                         .FirstOrDefaultAsync(p => p.PlaceName == placeName);
+                        if (place == null)
+                        {
+                            return NotFound($"Place with name {placeName} not found");
+                        }
+
+                        var originalAudio = place.PlaceMedias.FirstOrDefault(m => m.MediaType == "audio");
+                        if (originalAudio == null)
+                        {
+                            return NotFound($"Original audio for place {placeName} not found");
+                        }
+
+                        audioPath = originalAudio.MediaContent;
+                    }
+                    else
+                    {
+                        // Step 2: Translate the transcribed text
+                        string translationResult = await _translationService.TranslateTextAsync(transcribedText, targetLanguage);
+                        if (translationResult == null)
+                        {
+                            _logger.LogError($"Error during translation: {transcriptionResult}");
+                            return StatusCode(500, "Translation error.");
+                        }
+
+                        // Extract translated text from translation result if necessary
+                        string translatedText = ExtractTranslatedText(translationResult);
+
+                        // Step 3: Convert the translated text to speech
+                        audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
                     }
 
-                    // Extract translated text from translation result if necessary
-                    string translatedText = ExtractTranslatedText(translationResult);
-
-                    // Step 3: Convert the translated text to speech
-                    string audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioPath);
-
                     if (System.IO.File.Exists(filePath))
                     {
-                        //var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                        //return File(bytes, "audio/mp3", Path.GetFileName(filePath));
                         // Construct the full URL
                         var baseUrl = $"{Request.Scheme}://{Request.Host}";
                         var fullUrl = $"{baseUrl}/{audioPath.Replace("\\", "/")}";
