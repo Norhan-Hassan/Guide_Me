@@ -70,8 +70,12 @@ namespace AudioTranslation.Controllers
 
                     if (System.IO.File.Exists(filePath))
                     {
-                        var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                        return File(bytes, "audio/mp3", Path.GetFileName(filePath));
+                        //var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                        //return File(bytes, "audio/mp3", Path.GetFileName(filePath));
+                        // Construct the full URL
+                        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                        var fullUrl = $"{baseUrl}/{audioPath.Replace("\\", "/")}";
+                        return Ok(new { path = fullUrl });
                     }
                     else
                     {
