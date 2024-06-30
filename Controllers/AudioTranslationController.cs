@@ -1,9 +1,13 @@
-﻿
-using Guide_Me.Models;
+﻿using Guide_Me.Models;
 using Guide_Me.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace AudioTranslation.Controllers
 {
@@ -33,18 +37,19 @@ namespace AudioTranslation.Controllers
             _touristService = touristService;
             _context = applicationDbContext;
         }
+
         [HttpPost("translate-audio/{placeName}/{touristName}")]
-        public async Task<IActionResult> TranslateAudio(string placeName,  string touristName)
+        public async Task<IActionResult> TranslateAudio(string placeName, string touristName)
         {
             try
             {
-                string touristID= _touristService.GetUserIdByUsername(touristName);
+                string touristID = _touristService.GetUserIdByUsername(touristName);
                 if (touristID != null)
                 {
                     string targetLanguage = _context.Tourist.Where(t => t.Id == touristID).FirstOrDefault()?.Language;
 
                     // Step 1: Transcribe the audio file
-                    string transcriptionResult = await _audioTranscriptionService.TranscribeSingleAudioFileAsync(placeName);
+                    string transcriptionResult = await _audioTranscriptionService.TranscribeSingleAudioFileAsync(placeName, HttpContext);
                     if (transcriptionResult.StartsWith("Error"))
                     {
                         _logger.LogError($"Error during transcription: {transcriptionResult}");
@@ -71,8 +76,8 @@ namespace AudioTranslation.Controllers
 
                     if (System.IO.File.Exists(filePath))
                     {
-                        var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                        return File(bytes, "audio/mp3", Path.GetFileName(filePath));
+                        string fileUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{audioPath}";
+                        return Ok(new { url = fileUrl });
                     }
                     else
                     {
