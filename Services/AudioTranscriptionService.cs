@@ -1,15 +1,12 @@
-﻿using Guide_Me.Models;
-using Guide_Me.Services;
+﻿using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Guide_Me.Models;
+using Microsoft.Extensions.Logging;
 using NAudio.Wave;
 
 namespace Guide_Me.Services
@@ -20,6 +17,7 @@ namespace Guide_Me.Services
         private readonly AzureSpeechSettings _azureSpeechSettings;
         private readonly ILogger<AudioTranscriptionService> _logger;
         private readonly IPlaceService _placeService;
+
 
         public AudioTranscriptionService(
             ApplicationDbContext context,
@@ -32,6 +30,7 @@ namespace Guide_Me.Services
             _logger = logger;
             _placeService = placeService;
         }
+
 
         public async Task<string> TranscribeAudioAsync(string audioFilePath)
         {
@@ -124,30 +123,30 @@ namespace Guide_Me.Services
             }
         }
 
-        public async Task<string> TranscribeSingleAudioFileAsync(string placeName, HttpContext httpContext)
+        public async Task<string> TranscribeSingleAudioFileAsync(string placeName)
         {
             var placeID = _placeService.GetPlaceIdByPlaceName(placeName);
             if (placeID == 0)
             {
                 return $"Place {placeName} not found.";
             }
-
             var audioFile = await _context.placeMedias
-                .Where(m => m.PlaceId == placeID && m.MediaType == "audio")
-                .FirstOrDefaultAsync();
+                       .Where(m => m.PlaceId == placeID && m.MediaType == "audio").FirstOrDefaultAsync();
+
+            //var audioFile = await _context.audios.FindAsync(audioId);
 
             if (audioFile == null)
             {
                 return $"Audio file of place {placeName} not found.";
             }
 
-            // Construct the file URL without including 'wwwroot'
-            string fileUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}/audios/{Path.GetFileName(audioFile.MediaContent)}";
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioFile.MediaContent);
+            string result = await TranscribeAudioAsync(filePath);
+            Console.WriteLine(result);
 
-            // Optionally, log the URL for debugging
-            _logger.LogInformation($"Generated file URL: {fileUrl}");
-
-            return fileUrl;
+            return result;
         }
+
+
     }
 }

@@ -3,6 +3,6 @@
     public interface IAudioTranscriptionService
     {
         Task<string> TranscribeAudioAsync(string audioFilePath);
-        Task<string> TranscribeSingleAudioFileAsync(string placeName, HttpContext httpContext);
+        Task<string> TranscribeSingleAudioFileAsync(string placeName);
     }
 }
