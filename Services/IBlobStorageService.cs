@@ -2,6 +2,7 @@
 {
     public interface IBlobStorageService
     {
-        string GetBlobUrl(string containerName, string blobName);
+       // string GetBlobUrl(string containerName, string blobName);
+        string GetBlobUrlmedia(string MediaContent);
     }
 }

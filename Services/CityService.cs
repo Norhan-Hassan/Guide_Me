@@ -46,7 +46,8 @@ namespace Guide_Me.Services
                 {
                     Id = city.Id,
                     Name = cityNameToUse,
-                    CityImage = GetMediaUrl(city.CityImage),
+                    //CityImage = GetMediaUrl(city.CityImage),
+                    CityImage = _blobStorageService.GetBlobUrlmedia(city.CityImage),
                 };
 
                 cityDtos.Add(cityDto);
@@ -80,7 +81,7 @@ namespace Guide_Me.Services
             {
                 Id = city.Id,
                 Name = cityNameToUse,
-                CityImage = GetMediaUrl(city.CityImage),
+                CityImage = _blobStorageService.GetBlobUrlmedia(city.CityImage),
             };
 
             return cityDto;
@@ -92,15 +93,15 @@ namespace Guide_Me.Services
             var baseUrl = $"{request.Scheme}://{request.Host}";
             return $"{baseUrl}/{cityImage}";
         }
-        private string GetBlobUrlmedia(string CityImage)
-        {
-            // Replace this with actual container and blob name based on your storage structure
-            string containerName = "firstcontainer";
-            // Assuming CityImage is the blob name or a unique identifier for the blob
-            string blobName = CityImage;
-            // Call BlobStorageService to get the blob URL
-            return _blobStorageService.GetBlobUrl(containerName, blobName);
-        }
+        //private string GetBlobUrlmedia(string CityImage)
+        //{
+        //    // Replace this with actual container and blob name based on your storage structure
+        //    string containerName = "firstcontainer";
+        //    // Assuming CityImage is the blob name or a unique identifier for the blob
+        //    string blobName = CityImage;
+        //    // Call BlobStorageService to get the blob URL
+        //    return _blobStorageService.GetBlobUrl(containerName, blobName);
+        //}
 
     }
 }
