@@ -14,13 +14,15 @@ namespace Guide_Me.Services
             private readonly ApplicationDbContext _context;
             private readonly IHttpContextAccessor _httpContextAccessor;
             private readonly ITranslationService _translationService;
+            private readonly IBlobStorageService _blobStorageService;
 
-            public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITranslationService translationService)
+        public PlaceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITranslationService translationService, IBlobStorageService blobStorageService)
             {
                 _context = context;
                 _httpContextAccessor = httpContextAccessor;
                 _translationService = translationService;
-            }
+                _blobStorageService= blobStorageService;
+    }
 
             public List<PlaceItemDto> GetPlaceItems(string placeName)
             {
@@ -117,7 +119,7 @@ namespace Guide_Me.Services
                            .Select(m => new PlaceMediaDto
                            {
                                MediaType = m.MediaType,
-                               MediaContent = GetMediaUrl(m.MediaContent)
+                               MediaContent = _blobStorageService.GetBlobUrlmedia(m.MediaContent)
                            })
                            .ToList() ?? new List<PlaceMediaDto>(),
                     FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 
@@ -148,7 +150,7 @@ namespace Guide_Me.Services
                     if (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio")
                     {
                         mediaDto.MediaType = media.MediaType;
-                        mediaDto.MediaContent = (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio") ? GetMediaUrl(media.MediaContent) : media.MediaContent;
+                        mediaDto.MediaContent = (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio") ? _blobStorageService.GetBlobUrlmedia(media.MediaContent) : media.MediaContent;
                     }
                     else
                     {
@@ -206,7 +208,7 @@ namespace Guide_Me.Services
                 var placeDto = new SearchPlaceDto
                 {
                     placeName = placeName,
-                    placeImage = placeMedia != null ? GetMediaUrl(placeMedia.MediaContent) : null
+                    placeImage = placeMedia != null ? _blobStorageService.GetBlobUrlmedia(placeMedia.MediaContent) : null
 
                 };
                 return placeDto;

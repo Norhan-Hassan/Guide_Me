@@ -11,13 +11,15 @@ namespace Guide_Me.Services
         private readonly ITouristService _touristService;
         private readonly IPlaceService _placeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public RecommendationService(ApplicationDbContext context,ITouristService touristService, IPlaceService placeService, IHttpContextAccessor httpContextAccessor)
+        public RecommendationService(ApplicationDbContext context,ITouristService touristService, IPlaceService placeService, IHttpContextAccessor httpContextAccessor, IBlobStorageService blobStorageService)
         {
             _context = context;
             _touristService = touristService;
             _placeService = placeService;
             _httpContextAccessor = httpContextAccessor;
+            _blobStorageService = blobStorageService;
         }
 
         public  List<PlaceRecommendationDto> GetRecommendation(string touristName, string cityName , string placeName)
@@ -55,7 +57,7 @@ namespace Guide_Me.Services
                                .Select(p => new PlaceRecommendationDto
                                {
                                    PlaceName = p.Place.PlaceName,
-                                   Image = _placeService.GetMediaUrl(p.Place.PlaceMedias
+                                   Image = _blobStorageService.GetBlobUrlmedia(p.Place.PlaceMedias
                                        ?.FirstOrDefault(m => m.MediaType.ToLower() == "image")
                                        ?.MediaContent),
                                    Rate = _context.Rating
@@ -99,7 +101,7 @@ namespace Guide_Me.Services
                                                      return new PlaceRecommendationDto
                                                      {
                                                          PlaceName = place.PlaceName,
-                                                         Image = _placeService.GetMediaUrl(mediaContent),
+                                                         Image = _blobStorageService.GetBlobUrlmedia(mediaContent),
                                                          Rate = _context.Rating
                                                             .Where(r => r.PlaceId == place.Id) 
                                                             .Select(r => r.Rate)
