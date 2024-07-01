@@ -13,7 +13,7 @@ namespace Guide_Me.Services
             var connectionString = configuration.GetConnectionString("AzureStorage");
             _blobServiceClient = new BlobServiceClient(connectionString);
         }
-        private string GetBlobUrl(string containerName, string blobName)
+        public string GetBlobUrl(string containerName, string blobName)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
@@ -27,6 +27,20 @@ namespace Guide_Me.Services
             string blobName = MediaContent;
             // Call BlobStorageService to get the blob URL
             return GetBlobUrl(containerName, blobName);
+        }
+        public async Task DownloadBlobAsync(string blobName, string downloadFilePath)
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient("firstcontainer");
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            // Ensure the directory exists before attempting to download
+            var directory = Path.GetDirectoryName(downloadFilePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await blobClient.DownloadToAsync(downloadFilePath);
         }
     }
 }
