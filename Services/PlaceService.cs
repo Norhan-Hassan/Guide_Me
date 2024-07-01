@@ -110,6 +110,8 @@ namespace Guide_Me.Services
                 {
                     Name = placeNameToUse,
                     Category = categoryToUse,
+                    latitude=place.latitude,
+                    longtitude=place.longitude,
                     Media = place.PlaceMedias?
                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
                            .Select(m => new PlaceMediaDto
