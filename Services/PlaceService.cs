@@ -71,26 +71,22 @@ namespace Guide_Me.Services
 
         public List<PlaceDto> GetPlaces(string cityName, string touristName)
         {
-            // Translate the city name to English if necessary
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+        
+            var preferredLanguage = tourist.Language;
+
+            // Translate the city name to English if the preferred language is not English
             string cityNameToSearch = cityName;
-            if (!string.IsNullOrEmpty(cityName) && cityName != "en")
+            if (preferredLanguage != "en")
             {
                 cityNameToSearch = _translationService.TranslateTextResultASync(cityName, "en");
             }
 
             var city = _context.Cities.FirstOrDefault(c => c.CityName.ToLower() == cityNameToSearch.ToLower());
-            if (city == null)
+            if (city == null || tourist == null)
             {
                 return null;
             }
-
-            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
-            if (tourist == null)
-            {
-                return null;
-            }
-
-            var preferredLanguage = tourist.Language;
 
             var favoritePlaceIds = _context.Favorites
                                           .Where(f => f.TouristID == tourist.Id)
@@ -137,6 +133,7 @@ namespace Guide_Me.Services
 
             return placeDtos;
         }
+
 
 
         public List<PlaceMediaDto> GetPlaceMedia(string placeName)
