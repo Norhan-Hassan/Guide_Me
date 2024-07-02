@@ -1,4 +1,5 @@
 ﻿using Guide_Me.DTO;
+using Guide_Me.Models;
 
 namespace Guide_Me.Services
 {
@@ -9,5 +10,7 @@ namespace Guide_Me.Services
         TouristInfoProfileDto GetStudentInfo(string username);
         Task UpdateUserInfo(string Name, TouristInfoDto infoDto);
         string GetUserPhotoByUserId(string userId);
+        Tourist GetTouristById(string userId);
+        Tourist GetTouristByUsername(string username);
     }
 }

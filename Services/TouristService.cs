@@ -154,6 +154,14 @@ namespace Guide_Me.Services
 
             await _context.SaveChangesAsync();
         }
+        public Tourist GetTouristById(string userId)
+        {
+            return _context.Tourist.FirstOrDefault(t => t.Id == userId);
+        }
+        public Tourist GetTouristByUsername(string username)
+        {
+            return _context.Tourist.FirstOrDefault(t => t.UserName == username);
+        }
 
 
     }

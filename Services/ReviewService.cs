@@ -1,38 +1,52 @@
 ﻿using Guide_Me.DTO;
-using Guide_Me.Migrations;
 using Guide_Me.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Guide_Me.Services
 {
     public class ReviewsService : IReviewsService
     {
-        private readonly IPlaceService _IPlaceService;
-        private readonly ITouristService _ITouristService;
+        private readonly IPlaceService _placeService;
+        private readonly ITouristService _touristService;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ReviewsService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService, IHttpContextAccessor httpContextAccessor)
+        private readonly ITranslationService _translationService;
+
+        public ReviewsService(ApplicationDbContext context, ITouristService touristService,
+                              IPlaceService placeService, IHttpContextAccessor httpContextAccessor,
+                              ITranslationService translationService)
         {
             _context = context;
-            _ITouristService = ITouristService;
-            _IPlaceService = IPlaceService;
+            _touristService = touristService;
+            _placeService = placeService;
             _httpContextAccessor = httpContextAccessor;
+            _translationService = translationService;
         }
 
         public bool AddReviewOnPlace(ReviewPlaceDto reviewPlaceDto)
         {
-            var placeId = _IPlaceService.GetPlaceIdByPlaceName(reviewPlaceDto.placeName);
-            var touristId = _ITouristService.GetUserIdByUsername(reviewPlaceDto.touristName);
+            var placeId = _placeService.GetPlaceIdByPlaceName(reviewPlaceDto.placeName);
+            var touristId = _touristService.GetUserIdByUsername(reviewPlaceDto.touristName);
 
             if (placeId > 0 && touristId != null)
             {
+                var tourist = _touristService.GetTouristByUsername(reviewPlaceDto.touristName);
+                var targetLanguage = tourist.Language;
+                string translatedComment = reviewPlaceDto.comment;
+
+                if (targetLanguage != "en")
+                {
+                    translatedComment = _translationService.TranslateTextResultASync(reviewPlaceDto.comment, "en");
+                }
 
                 _context.Reviews.Add(new Review
                 {
                     TouristId = touristId,
                     placeId = placeId,
-                    Comment = reviewPlaceDto.comment,
+                    Comment = translatedComment,
                 });
                 _context.SaveChanges();
                 return true;
@@ -43,36 +57,48 @@ namespace Guide_Me.Services
             }
         }
 
-        public List<TouristReviewDto> GetReviewOnPlace(string placeName)
+        public List<TouristReviewDto> GetReviewOnPlace(string placeName, string touristName)
         {
-            int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeName);
-            List<Review> reviews = new List<Review>();
-            List<TouristReviewDto> result = new List<TouristReviewDto>();
-            if (placeID > 0)
+            int placeID = _placeService.GetPlaceIdByPlaceName(placeName);
+            if (placeID <= 0)
             {
-                foreach (var review in _context.Reviews)
-                {
-                    reviews.Add(review);
-                }
-                foreach (var item in reviews)
-                {
-                    if(item.placeId==placeID)
-                    {
-                        result.Add(new TouristReviewDto
-                        {
-                            comment = item.Comment,
-                            touristName = _ITouristService.GetUserNameByUserId(item.TouristId),
-                            PhotoUrl= string.IsNullOrEmpty(_ITouristService.GetUserPhotoByUserId(item.TouristId)) ? null : $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(_ITouristService.GetUserPhotoByUserId(item.TouristId))}"
-                        });
-
-                    }
-                }
-            }
-            if (result.Count > 0)
-                return result;
-            else
                 return null;
-        }
+            }
 
+            var tourist = _touristService.GetTouristByUsername(touristName);
+            if (tourist == null)
+            {
+                return null;
+            }
+
+            var targetLanguage = tourist.Language;
+
+            // Fetch all reviews for the place in a single query and then process them
+            var reviews = _context.Reviews.Where(r => r.placeId == placeID).ToList();
+
+            List<TouristReviewDto> result = new List<TouristReviewDto>();
+
+            foreach (var review in reviews)
+            {
+                string commentToUse = review.Comment;
+
+                // Translate comment to the tourist's preferred language if not already in that language
+                if (targetLanguage != "en")
+                {
+                    commentToUse = _translationService.TranslateTextResultASync(review.Comment, targetLanguage);
+                }
+
+                result.Add(new TouristReviewDto
+                {
+                    comment = commentToUse,
+                    touristName = _touristService.GetUserNameByUserId(review.TouristId),
+                    PhotoUrl = string.IsNullOrEmpty(_touristService.GetUserPhotoByUserId(review.TouristId))
+                                ? null
+                                : $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(_touristService.GetUserPhotoByUserId(review.TouristId))}"
+                });
+            }
+
+            return result.Count > 0 ? result : null;
+        }
     }
 }

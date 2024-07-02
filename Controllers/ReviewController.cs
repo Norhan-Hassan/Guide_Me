@@ -11,7 +11,6 @@ namespace Guide_Me.Controllers
     [Authorize]
     public class ReviewController : ControllerBase
     {
-
         private readonly IReviewsService _reviewService;
 
         public ReviewController(IReviewsService reviewService)
@@ -20,12 +19,12 @@ namespace Guide_Me.Controllers
         }
 
         [HttpGet("GetReviews")]
-        public IActionResult GetReviews(string placeName)
+        public IActionResult GetReviews(string placeName, string touristName)
         {
-            if (_reviewService.GetReviewOnPlace(placeName) != null)
+            var reviews = _reviewService.GetReviewOnPlace(placeName, touristName);
+            if (reviews != null)
             {
-                
-                return Ok(_reviewService.GetReviewOnPlace(placeName));
+                return Ok(reviews);
             }
             else
             {
@@ -33,11 +32,10 @@ namespace Guide_Me.Controllers
             }
         }
 
-
         [HttpPost("AddReview")]
         public IActionResult ReviewPlace(ReviewPlaceDto reviewPlaceDto)
         {
-            if (_reviewService.AddReviewOnPlace(reviewPlaceDto) == true)
+            if (_reviewService.AddReviewOnPlace(reviewPlaceDto))
             {
                 return Ok("Review Saved");
             }
