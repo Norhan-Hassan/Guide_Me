@@ -29,8 +29,6 @@ namespace Guide_Me.Services
 
         public void MarkFavoritePlace(FavouritePlacesDto request)
         {
-            //try
-            //{
             var touristId = _ITouristService.GetUserIdByUsername(request.TouristName);
             var placeId = _IPlaceService.GetPlaceIdByPlaceName(request.PlaceName);
 
@@ -44,7 +42,6 @@ namespace Guide_Me.Services
                     TouristID = touristId,
                     PlaceID = placeId
                 });
-
             }
             else
             {
@@ -55,15 +52,14 @@ namespace Guide_Me.Services
             _context.SaveChanges();
         }
 
-
-        public List<PlaceDto> GetAllFavoritesByTourist(string touristName)
+        public List<FavoritePlaceDtoreturn> GetAllFavoritesByTourist(string touristName)
         {
             var touristId = _ITouristService.GetUserIdByUsername(touristName);
 
             if (string.IsNullOrEmpty(touristId))
             {
                 // If the tourist does not exist, return an empty list
-                return new List<PlaceDto>();
+                return new List<FavoritePlaceDtoreturn>();
             }
 
             var favoritePlaces = _context.Favorites
@@ -73,20 +69,25 @@ namespace Guide_Me.Services
 
             var places = _context.Places
                 .Where(p => favoritePlaces.Contains(p.Id))
-                .Select(p => new PlaceDto
+                .Select(p => new FavoritePlaceDtoreturn
                 {
                     Name = p.PlaceName,
                     Category = p.Category,
-                    Media = p.PlaceMedias.Select(pm => new PlaceMediaDto
-                    {
-                        MediaType = pm.MediaType,
-                        MediaContent = pm.MediaType.ToLower() == "text" ? pm.MediaContent : GetMediaUrl(pm.MediaContent, _httpContextAccessor.HttpContext)
-                    }).ToList()
+                    
+                    FavoriteFlag = favoritePlaces.Contains(p.Id) ? 1 : 0,
+                    Media = p.PlaceMedias
+                        .Where(pm => pm.MediaType.ToLower() == "image")
+                        .Select(pm => new PlaceMediaDto
+                        {
+                            MediaType = pm.MediaType,
+                            MediaContent = GetMediaUrl(pm.MediaContent, _httpContextAccessor.HttpContext)
+                        }).ToList()
                 })
                 .ToList();
 
             return places;
         }
+
 
         private static string GetMediaUrl(string mediaContent, HttpContext httpContext)
         {
@@ -94,6 +95,8 @@ namespace Guide_Me.Services
             var baseUrl = $"{request.Scheme}://{request.Host}";
             return $"{baseUrl}/{mediaContent}";
         }
+
+
     }
 }
 

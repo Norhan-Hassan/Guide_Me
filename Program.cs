@@ -25,12 +25,11 @@ namespace Guide_Me
             // Add services to the container.
 
             builder.Services.AddControllers()
-                  .AddJsonOptions(options =>
-                   {
-                       options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                       options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve; // if needed
-                   });
-
+                  .AddNewtonsoftJson(options =>
+                  {
+                      options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                      options.SerializerSettings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.None;
+                  });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
