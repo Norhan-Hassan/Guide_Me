@@ -46,7 +46,6 @@ namespace Guide_Me.Services
                 {
                     Id = city.Id,
                     Name = cityNameToUse,
-                    //CityImage = GetMediaUrl(city.CityImage),
                     CityImage = _blobStorageService.GetBlobUrlmedia(city.CityImage),
                 };
 

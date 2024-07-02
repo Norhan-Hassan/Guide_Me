@@ -71,16 +71,23 @@ namespace Guide_Me.Services
 
         public List<PlaceDto> GetPlaces(string cityName, string touristName)
         {
-            var city = _context.Cities.FirstOrDefault(c => c.CityName == cityName);
+            // Translate the city name to English if necessary
+            string cityNameToSearch = cityName;
+            if (!string.IsNullOrEmpty(cityName) && cityName != "en")
+            {
+                cityNameToSearch = _translationService.TranslateTextResultASync(cityName, "en");
+            }
+
+            var city = _context.Cities.FirstOrDefault(c => c.CityName.ToLower() == cityNameToSearch.ToLower());
             if (city == null)
             {
-                return null; 
+                return null;
             }
 
             var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
             if (tourist == null)
             {
-                return null; 
+                return null;
             }
 
             var preferredLanguage = tourist.Language;
@@ -112,8 +119,8 @@ namespace Guide_Me.Services
                 {
                     Name = placeNameToUse,
                     Category = categoryToUse,
-                    latitude=place.latitude,
-                    longtitude=place.longitude,
+                    latitude = place.latitude,
+                    longtitude = place.longitude,
                     Media = place.PlaceMedias?
                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
                            .Select(m => new PlaceMediaDto
@@ -122,7 +129,7 @@ namespace Guide_Me.Services
                                MediaContent = _blobStorageService.GetBlobUrlmedia(m.MediaContent)
                            })
                            .ToList() ?? new List<PlaceMediaDto>(),
-                    FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0 
+                    FavoriteFlag = favoritePlaceIds.Contains(place.Id) ? 1 : 0
                 };
 
                 placeDtos.Add(placeDto);
