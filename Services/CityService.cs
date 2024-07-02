@@ -58,11 +58,6 @@ namespace Guide_Me.Services
 
         public CityDto GetCityByName(string cityName, string touristName)
         {
-            var city = _context.Cities.FirstOrDefault(c => c.CityName.ToLower() == cityName.ToLower());
-            if (city == null)
-            {
-                return null;
-            }
             var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
             if (tourist == null)
             {
@@ -71,7 +66,19 @@ namespace Guide_Me.Services
 
             var targetLanguage = tourist.Language;
 
-            string cityNameToUse = cityName;
+            string cityNameToSearch = cityName;
+            if (targetLanguage != "en")
+            {
+                cityNameToSearch = _translationService.TranslateTextResultASync(cityName, "en");
+            }
+
+            var city = _context.Cities.FirstOrDefault(c => c.CityName.ToLower() == cityNameToSearch.ToLower());
+            if (city == null)
+            {
+                return null;
+            }
+
+            string cityNameToUse = city.CityName;
             if (targetLanguage != "en")
             {
                 cityNameToUse = _translationService.TranslateTextResultASync(city.CityName, targetLanguage);
@@ -87,21 +94,14 @@ namespace Guide_Me.Services
             return cityDto;
         }
 
+
         private string GetMediaUrl(string cityImage)
         {
             var request = _httpContextAccessor.HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
             return $"{baseUrl}/{cityImage}";
         }
-        //private string GetBlobUrlmedia(string CityImage)
-        //{
-        //    // Replace this with actual container and blob name based on your storage structure
-        //    string containerName = "firstcontainer";
-        //    // Assuming CityImage is the blob name or a unique identifier for the blob
-        //    string blobName = CityImage;
-        //    // Call BlobStorageService to get the blob URL
-        //    return _blobStorageService.GetBlobUrl(containerName, blobName);
-        //}
+        
 
     }
 }
