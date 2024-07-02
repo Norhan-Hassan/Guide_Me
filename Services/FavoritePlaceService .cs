@@ -17,14 +17,21 @@ namespace Guide_Me.Services
         private readonly IPlaceService _IPlaceService;
         private readonly ILogger<FavoritePlaceService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public FavoritePlaceService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService, ILogger<FavoritePlaceService> logger, IHttpContextAccessor httpContextAccessor)
+        public FavoritePlaceService(ApplicationDbContext context, 
+            ITouristService ITouristService,
+            IPlaceService IPlaceService, 
+            ILogger<FavoritePlaceService> logger,
+            IHttpContextAccessor httpContextAccessor,
+            IBlobStorageService blobStorageService)
         {
             _context = context;
             _ITouristService = ITouristService;
             _IPlaceService = IPlaceService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _blobStorageService = blobStorageService;
         }
 
         public void MarkFavoritePlace(FavouritePlacesDto request)
@@ -80,22 +87,13 @@ namespace Guide_Me.Services
                         .Select(pm => new PlaceMediaDto
                         {
                             MediaType = pm.MediaType,
-                            MediaContent = GetMediaUrl(pm.MediaContent, _httpContextAccessor.HttpContext)
+                            MediaContent = _blobStorageService.GetBlobUrlmedia(pm.MediaContent)
                         }).ToList()
                 })
                 .ToList();
 
             return places;
         }
-
-
-        private static string GetMediaUrl(string mediaContent, HttpContext httpContext)
-        {
-            var request = httpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            return $"{baseUrl}/{mediaContent}";
-        }
-
 
     }
 }
