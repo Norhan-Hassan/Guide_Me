@@ -18,13 +18,15 @@ namespace Guide_Me.Services
         private readonly ILogger<FavoritePlaceService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IBlobStorageService _blobStorageService;
+        private readonly ITranslationService _translationService;
 
         public FavoritePlaceService(ApplicationDbContext context, 
             ITouristService ITouristService,
             IPlaceService IPlaceService, 
             ILogger<FavoritePlaceService> logger,
             IHttpContextAccessor httpContextAccessor,
-            IBlobStorageService blobStorageService)
+            IBlobStorageService blobStorageService,
+            ITranslationService translationService)
         {
             _context = context;
             _ITouristService = ITouristService;
@@ -32,12 +34,29 @@ namespace Guide_Me.Services
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _blobStorageService = blobStorageService;
+            _translationService= translationService;
         }
 
         public void MarkFavoritePlace(FavouritePlacesDto request)
         {
+            var tourist = _ITouristService.GetTouristByUsername(request.TouristName);
+            if (tourist == null)
+            {
+
+                throw new ArgumentException("Tourist not found.");
+            }
+
+            var targetLanguage = tourist.Language;
+            string translatedPlaceName = request.PlaceName;
+
+            // Translate placeName to English if tourist's preferred language is not English
+            if (targetLanguage != "en")
+            {
+                translatedPlaceName = _translationService.TranslateTextResultASync(request.PlaceName, "en");
+            }
+
             var touristId = _ITouristService.GetUserIdByUsername(request.TouristName);
-            var placeId = _IPlaceService.GetPlaceIdByPlaceName(request.PlaceName);
+            var placeId = _IPlaceService.GetPlaceIdByPlaceName(translatedPlaceName);
 
             var existingFavorite = _context.Favorites.FirstOrDefault(f => f.PlaceID == placeId && f.TouristID == touristId);
 
@@ -59,29 +78,33 @@ namespace Guide_Me.Services
             _context.SaveChanges();
         }
 
+
         public List<FavoritePlaceDtoreturn> GetAllFavoritesByTourist(string touristName)
         {
-            var touristId = _ITouristService.GetUserIdByUsername(touristName);
-
-            if (string.IsNullOrEmpty(touristId))
+            var tourist = _ITouristService.GetTouristByUsername(touristName);
+            if (tourist == null)
             {
-                // If the tourist does not exist, return an empty list
-                return new List<FavoritePlaceDtoreturn>();
+    
+                return null;
             }
 
+            var targetLanguage = tourist.Language;
+            var touristId = tourist.Id;
+
+            // Fetch all favorite place IDs for the tourist
             var favoritePlaces = _context.Favorites
                 .Where(f => f.TouristID == touristId)
                 .Select(f => f.PlaceID)
                 .ToList();
 
+            // Fetch details for all favorite places
             var places = _context.Places
                 .Where(p => favoritePlaces.Contains(p.Id))
                 .Select(p => new FavoritePlaceDtoreturn
                 {
-                    Name = p.PlaceName,
+                    Name = targetLanguage != "en" ? _translationService.TranslateTextResultASync(p.PlaceName, targetLanguage) : p.PlaceName,
                     Category = p.Category,
-                    
-                    FavoriteFlag = favoritePlaces.Contains(p.Id) ? 1 : 0,
+                    FavoriteFlag = 1, 
                     Media = p.PlaceMedias
                         .Where(pm => pm.MediaType.ToLower() == "image")
                         .Select(pm => new PlaceMediaDto
@@ -94,6 +117,7 @@ namespace Guide_Me.Services
 
             return places;
         }
+
 
     }
 }

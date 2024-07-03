@@ -121,7 +121,7 @@ namespace Guide_Me.Services
 
             var places = _context.Places
                                 .Include(p => p.PlaceMedias)
-                                .Where(p => p.CityId == city.Id)
+                                .Where(p => p.CityId == city.Id )
                                 .ToList();
 
             List<PlaceDto> placeDtos = new List<PlaceDto>();
@@ -181,7 +181,7 @@ namespace Guide_Me.Services
             if (place != null)
             {
                 var placeMedia = _context.placeMedias
-                    .Where(pm => pm.PlaceId == place.Id &&( pm.MediaType == "image" || pm.MediaType=="text" || pm.MediaType=="video"))
+                    .Where(pm => pm.PlaceId == place.Id &&( pm.MediaType.ToLower() == "image" || pm.MediaType.ToLower() == "text" || pm.MediaType.ToLower() == "video"))
                     .ToList();
 
                 foreach (var media in placeMedia)
@@ -192,18 +192,18 @@ namespace Guide_Me.Services
                         MediaType = media.MediaType
                     };
 
-                    if (media.MediaType == "image" || media.MediaType == "video")// || media.MediaType == "audio")
+                    if (media.MediaType.ToLower() == "image" || media.MediaType.ToLower() == "video")// || media.MediaType == "audio")
                     {
                         mediaDto.MediaContent = _blobStorageService.GetBlobUrlmedia(media.MediaContent);
                     }
                    
-                    else if(media.MediaType == "text")
+                    else if(media.MediaType.ToLower() == "text")
                     {
                         mediaDto.MediaContent = media.MediaContent;
                     }
 
                     // Translate media content if it's text
-                    if (preferredLanguage != "en" && mediaDto.MediaType == "text")
+                    if (preferredLanguage != "en" && mediaDto.MediaType.ToLower() == "text")
                     {
                         mediaDto.MediaContent = _translationService.TranslateTextResultASync(mediaDto.MediaContent, preferredLanguage);
                     }
