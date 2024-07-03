@@ -5,7 +5,7 @@ namespace Guide_Me.Services
 {
     public interface IPlaceService
     {
-        List<PlaceDto> GetPlaces(string cityName, string touristName);
+        List<PlaceWithoutLocationDto> GetPlaces(string cityName, string touristName);
         List<PlaceItemDto> GetPlaceItems(string placeName, string touristName);
         List<PlaceMediaDto> GetPlaceMedia(string placeName, string touristName);
         string GetMediaUrl(string mediaContent);

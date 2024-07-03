@@ -10,11 +10,15 @@ namespace Guide_Me.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ITouristService _ITouristService;
+        private readonly ITranslationService _translationService;
 
-        public SuggestionplacebyuserService(ApplicationDbContext context, ITouristService ITouristService)
+        public SuggestionplacebyuserService(ApplicationDbContext context,
+            ITouristService ITouristService,
+            ITranslationService translationService)
         {
             _context = context;
             _ITouristService = ITouristService;
+            _translationService = translationService;
         }
 
         public async Task SubmitSuggestion(string placeName, string? address, double? latitude, double? longitude, string touristName)
@@ -31,7 +35,21 @@ namespace Guide_Me.Services
                 throw new ArgumentException("Tourist not found", nameof(touristName));
             }
 
-            var existingPlace = await _context.Places.FirstOrDefaultAsync(p => p.PlaceName == placeName);
+            // Translate placeName and address to English if tourist's preferred language is not English
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            string translatedPlaceName = placeName;
+            string translatedAddress = address;
+
+            if (preferredLanguage != "en")
+            {
+                translatedPlaceName = _translationService.TranslateTextResultASync(placeName, "en");
+                translatedAddress =  _translationService.TranslateTextResultASync(address, "en");
+            }
+
+            // Check if the place already exists
+            var existingPlace = await _context.Places.FirstOrDefaultAsync(p => p.PlaceName == translatedPlaceName);
             if (existingPlace != null)
             {
                 throw new ArgumentException("Place already exists", nameof(placeName));
@@ -39,8 +57,8 @@ namespace Guide_Me.Services
 
             var suggestionplace = new Suggestionplacebyuser
             {
-                PlaceName = placeName,
-                Address = address,
+                PlaceName = translatedPlaceName,
+                Address = translatedAddress,
                 Latitude = latitude,
                 Longitude = longitude,
                 TouristId = touristId
@@ -49,5 +67,6 @@ namespace Guide_Me.Services
             _context.Suggestionplacebyusers.Add(suggestionplace);
             await _context.SaveChangesAsync();
         }
+
     }
 }

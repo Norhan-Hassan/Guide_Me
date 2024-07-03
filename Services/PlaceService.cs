@@ -95,7 +95,7 @@ namespace Guide_Me.Services
 
 
 
-        public List<PlaceDto> GetPlaces(string cityName, string touristName)
+        public List<PlaceWithoutLocationDto> GetPlaces(string cityName, string touristName)
         {
             var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
         
@@ -124,7 +124,7 @@ namespace Guide_Me.Services
                                 .Where(p => p.CityId == city.Id )
                                 .ToList();
 
-            List<PlaceDto> placeDtos = new List<PlaceDto>();
+            List<PlaceWithoutLocationDto> placeDtos = new List<PlaceWithoutLocationDto>();
 
             foreach (var place in places)
             {
@@ -137,12 +137,10 @@ namespace Guide_Me.Services
                     categoryToUse = _translationService.TranslateTextResultASync(place.Category, preferredLanguage);
                 }
 
-                var placeDto = new PlaceDto
+                var placeDto = new PlaceWithoutLocationDto
                 {
                     Name = placeNameToUse,
                     Category = categoryToUse,
-                    latitude = place.latitude,
-                    longtitude = place.longitude,
                     Media = place.PlaceMedias?
                            .Where(m => m.MediaType.ToLower() == "image") // Filter only image media types
                            .Select(m => new PlaceMediaDto
