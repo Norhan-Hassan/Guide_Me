@@ -9,7 +9,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   // [Authorize]
+     [Authorize]
     public class RatingController : ControllerBase
     {
         private readonly IRatingService _ratingService;
