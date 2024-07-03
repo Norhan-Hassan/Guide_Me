@@ -31,10 +31,10 @@ namespace Guide_Me.Controllers
 
             return Ok(places);
         }
-        [HttpGet("{placeName}/places/items")]
-        public IActionResult GetItemsByPlace(string placeName)
+        [HttpGet("{placeName}/{touristName}/places/items")]
+        public IActionResult GetItemsByPlace(string placeName,string touristName)
         {
-            var placeItems = _placeService.GetPlaceItems(placeName);
+            var placeItems = _placeService.GetPlaceItems(placeName, touristName);
             if (placeItems == null)
             {
                 return NotFound();
@@ -43,12 +43,12 @@ namespace Guide_Me.Controllers
             return Ok(placeItems);
         }
 
-        [HttpGet("{placeName}/places/location")]
-        public IActionResult PostLocationByName(string placeName)
+        [HttpGet("{placeName}/{touristName}/places/location")]
+        public IActionResult PostLocationByName(string placeName, string touristName)
         {
             try
             {
-                var placeLocation = _placeService.GetLocation(placeName);
+                var placeLocation = _placeService.GetLocation(placeName,touristName);
                 return Ok(placeLocation);
             }
             catch (Exception ex)
@@ -57,10 +57,10 @@ namespace Guide_Me.Controllers
             }
         }
 
-        [HttpGet("{placeName}/places/media")]
-        public IActionResult GetMediaByPlace(string placeName)
+        [HttpGet("{placeName}/{touristName}/places/media")]
+        public IActionResult GetMediaByPlace(string placeName, string touristName)
         {
-            var placeMedia = _placeService.GetPlaceMedia(placeName);
+            var placeMedia = _placeService.GetPlaceMedia(placeName,touristName);
             if (placeMedia == null)
             {
                 return NotFound();
@@ -70,10 +70,10 @@ namespace Guide_Me.Controllers
         }
 
         [HttpGet]
-        [Route("{placeName}/{cityName}/SearchPlace")]
-        public IActionResult SearchPlace(string placeName, string cityName)
+        [Route("{placeName}/{cityName}/{touristName}/SearchPlace")]
+        public IActionResult SearchPlace(string placeName, string cityName, string touristName)
         {
-            var place = _placeService.SerachPlace(placeName, cityName);
+            var place = _placeService.SerachPlace(placeName, cityName, touristName);
             if (place == null)
             {
                 return NotFound($"Place with name '{placeName}' is not found.");

@@ -22,51 +22,77 @@ namespace Guide_Me.Services
                 _httpContextAccessor = httpContextAccessor;
                 _translationService = translationService;
                 _blobStorageService= blobStorageService;
-    }
+             }
 
-            public List<PlaceItemDto> GetPlaceItems(string placeName)
+        public List<PlaceItemDto> GetPlaceItems(string placeName, string touristName)
+        {
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
             {
-                var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
-                var placeItemsMap = new List<PlaceItemDto>();
-
-                if (place != null)
-                {
-
-                    var placeItems = _context.placeItem
-                        .Include(p => p.PlaceItemMedias)
-                        .Where(pi => pi.placeID == place.Id)
-                        .ToList();
-
-                    foreach (var placeItem in placeItems)
-                    {
-                        PlaceWithoutMediaDto placeDto = new PlaceWithoutMediaDto
-                        {
-                            Name = place.PlaceName,
-                            Category = place.Category,
-
-                        };
-
-                        var placeItemDto = new PlaceItemDto
-                        {
-                            ID = placeItem.ID,
-                            placeItemName = placeItem.placeItemName,
-                            Media = placeItem.PlaceItemMedias != null ?
-                             placeItem.PlaceItemMedias.Select(media => new ItemMediaDto
-                             {
-                                 MediaContent = media.MediaContent,
-                                 MediaType = media.MediaType,
-                             })
-                             .ToList()
-                             : new List<ItemMediaDto>()
-
-                        };
-
-                        placeItemsMap.Add(placeItemDto);
-                    }
-                }
-
-                return placeItemsMap;
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
             }
+
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeNameToSearch);
+            var placeItemsMap = new List<PlaceItemDto>();
+
+            if (place != null)
+            {
+                var placeItems = _context.placeItem
+                    .Include(pi => pi.PlaceItemMedias)
+                    .Where(pi => pi.ID == place.Id)
+                    .ToList();
+
+                foreach (var placeItem in placeItems)
+                {
+                    // Translate place item name if the preferred language is not English
+                    string placeItemNameToUse = placeItem.placeItemName;
+                    if (preferredLanguage != "en")
+                    {
+                        placeItemNameToUse = _translationService.TranslateTextResultASync(placeItem.placeItemName, preferredLanguage);
+                    }
+
+                    var placeItemDto = new PlaceItemDto
+                    {
+                        ID = placeItem.ID,
+                        placeItemName = placeItemNameToUse,
+                        Media = placeItem.PlaceItemMedias != null ?
+                            placeItem.PlaceItemMedias.Select(media =>
+                            {
+                                var mediaDto = new ItemMediaDto
+                                {
+                                    MediaType = media.MediaType
+                                };
+
+                                // Translate media content if it's not an image, video, or audio
+                                if (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio")
+                                {
+                                    mediaDto.MediaContent = _blobStorageService.GetBlobUrlmedia(media.MediaContent);
+                                }
+                                else
+                                {
+                                    mediaDto.MediaContent = media.MediaContent;
+                                    if (preferredLanguage != "en")
+                                    {
+                                        mediaDto.MediaContent = _translationService.TranslateTextResultASync(media.MediaContent, preferredLanguage);
+                                    }
+                                }
+
+                                return mediaDto;
+                            }).ToList()
+                            : new List<ItemMediaDto>()
+                    };
+
+                    placeItemsMap.Add(placeItemDto);
+                }
+            }
+
+            return placeItemsMap;
+        }
+
 
 
         public List<PlaceDto> GetPlaces(string cityName, string touristName)
@@ -136,10 +162,21 @@ namespace Guide_Me.Services
 
 
 
-        public List<PlaceMediaDto> GetPlaceMedia(string placeName)
+        public List<PlaceMediaDto> GetPlaceMedia(string placeName, string touristName)
         {
-            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
-            var placeMediaMap = new List<PlaceMediaDto>();
+           
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
+            }
+
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeNameToSearch);
+            var placeMedias = new List<PlaceMediaDto>();
 
             if (place != null)
             {
@@ -149,37 +186,45 @@ namespace Guide_Me.Services
 
                 foreach (var media in placeMedia)
                 {
-                    var mediaDto = new PlaceMediaDto();
+                    var mediaDto = new PlaceMediaDto
+                    {
+                        MediaType = media.MediaType
+                    };
 
                     if (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio")
                     {
-                        mediaDto.MediaType = media.MediaType;
-                        mediaDto.MediaContent = (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio") ? _blobStorageService.GetBlobUrlmedia(media.MediaContent) : media.MediaContent;
+                        mediaDto.MediaContent = _blobStorageService.GetBlobUrlmedia(media.MediaContent);
                     }
                     else
                     {
-                        mediaDto.MediaType = media.MediaType;
                         mediaDto.MediaContent = media.MediaContent;
                     }
 
-                    placeMediaMap.Add(mediaDto);
+                    // Translate media content if it's text
+                    if (preferredLanguage != "en" && mediaDto.MediaType == "text")
+                    {
+                        mediaDto.MediaContent = _translationService.TranslateTextResultASync(mediaDto.MediaContent, preferredLanguage);
+                    }
+
+                    placeMedias.Add(mediaDto);
                 }
             }
 
-            return placeMediaMap;
+            return placeMedias;
         }
 
-        public string GetMediaUrl(string mediaContent)
+        public PlaceLocationDto GetLocation(string placeName , string touristName)
         {
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
 
-            var request = _httpContextAccessor.HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            return $"{baseUrl}/{mediaContent}";
-        }
-
-        public PlaceLocationDto GetLocation(string placeName)
-        {
-            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName);
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
+            }
+            var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeNameToSearch);
             if (place == null)
             {
                 throw new Exception("Place not found");
@@ -201,17 +246,32 @@ namespace Guide_Me.Services
             return place != null ? place.Id : 0;
         }
 
-        public SearchPlaceDto SerachPlace(string placeName , string cityName)
+        public SearchPlaceDto SerachPlace(string placeName , string cityName, string touristName)
         {
-            int placeid = GetPlaceIdByPlaceName(placeName);
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
+            }
+            string cityNameToSearch = cityName;
+            if (preferredLanguage != "en")
+            {
+                cityNameToSearch = _translationService.TranslateTextResultASync(cityName, "en");
+            }
+
+            int placeid = GetPlaceIdByPlaceName(placeNameToSearch);
             if(placeid > 0)
             {
-                var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeName && p.City.CityName == cityName);
+                var place = _context.Places.FirstOrDefault(p => p.PlaceName == placeNameToSearch && p.City.CityName == cityNameToSearch);
                 var placeMedia = _context.placeMedias.FirstOrDefault(pm => pm.PlaceId == place.Id && pm.MediaType == "image");
 
                 var placeDto = new SearchPlaceDto
                 {
-                    placeName = placeName,
+                    placeName = placeNameToSearch,
                     placeImage = placeMedia != null ? _blobStorageService.GetBlobUrlmedia(placeMedia.MediaContent) : null
 
                 };
@@ -219,7 +279,14 @@ namespace Guide_Me.Services
             }
             return null;
         }
-        
+
+        public string GetMediaUrl(string mediaContent)
+        {
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            return $"{baseUrl}/{mediaContent}";
+        }
 
     }
 }
