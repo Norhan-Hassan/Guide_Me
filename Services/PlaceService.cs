@@ -271,7 +271,7 @@ namespace Guide_Me.Services
 
                 var placeDto = new SearchPlaceDto
                 {
-                    placeName = placeNameToSearch,
+                    placeName = placeName,
                     placeImage = placeMedia != null ? _blobStorageService.GetBlobUrlmedia(placeMedia.MediaContent) : null
 
                 };
