@@ -88,6 +88,9 @@ namespace Guide_Me.Services
                     { "it", "it-IT-ElsaNeural" },        // Italian (Italy)
                     { "es", "es-ES-ElviraNeural" },    // Spanish (Spain)
                     { "de" , "de-DE-KatjaNeural"}, //
+                    { "ja" , "ja-JP-NanamiNeural" } ,// japan
+                    { "ru","ru-RU-SvetlanaNeural" },//Russia
+                    { "zh","zh-CN-guangxi-YunqiNeural" }, //Chinese
                     // Add more mappings as needed for other languages supported by Azure Speech
                 };
 
