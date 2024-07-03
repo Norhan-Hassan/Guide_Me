@@ -1,4 +1,5 @@
 ﻿using Guide_Me.Services;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System.Threading.Tasks;
@@ -60,5 +61,7 @@ namespace Guide_Me.Services
         {
             return TranslatedataAsync(text, targetLanguage).Result;
         }
+        
+
     }
 }

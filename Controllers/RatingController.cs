@@ -9,7 +9,7 @@ namespace Guide_Me.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+   // [Authorize]
     public class RatingController : ControllerBase
     {
         private readonly IRatingService _ratingService;
@@ -37,17 +37,17 @@ namespace Guide_Me.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-        [HttpGet("{placeName}/OverAllRating")]
-        public IActionResult GetOverallRating(string placeName)
+        [HttpGet("{placeName}/{touristName}/OverAllRating")]
+        public IActionResult GetOverallRating(string placeName, string touristName)
         {
-            int rate = _ratingService.GetOverAllRateOfPlace(placeName);
+            int rate = _ratingService.GetOverAllRateOfPlace(placeName,touristName);
             return Ok(rate);
         }
 
-        [HttpGet("{RateNumber}/Rating/Suggestion")]
-        public IActionResult GetSggestions(int RateNumber)
+        [HttpGet("{RateNumber}/{touristName}/Rating/Suggestion")]
+        public IActionResult GetSggestions(int RateNumber, string touristName)
         {
-            List<string> suggestions = _ratingService.GetSuggestionsBasedOnRating(RateNumber).ToList();
+            List<string> suggestions = _ratingService.GetSuggestionsBasedOnRating(RateNumber, touristName).ToList();
             if (suggestions.Count == 0)
             {
                 return BadRequest("No Suggestions");

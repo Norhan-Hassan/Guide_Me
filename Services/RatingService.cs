@@ -10,6 +10,7 @@ namespace Guide_Me.Services
         private readonly IPlaceService _IPlaceService;
         private readonly ITouristService _ITouristService;
         private readonly ApplicationDbContext _context;
+        private readonly ITranslationService _translationService;
         public Dictionary<int, List<string>> suggestions = new Dictionary<int, List<string>>()
         {
             {1, ["Poor Service Content","Cleanliness Concerns","OverCrowding","High Prices","Ineffective Communication","Lack Of Culture Sensitivity"] },
@@ -19,17 +20,32 @@ namespace Guide_Me.Services
             {5, ["Attractive Environment","Engaging Activity","Ease Of Access","Effective Safety","Culture Signficance","Sweet soul people"] }
         };
         
-        public RatingService(ApplicationDbContext context, ITouristService ITouristService, IPlaceService IPlaceService)
+        public RatingService(ApplicationDbContext context,
+            ITouristService ITouristService,
+            IPlaceService IPlaceService,
+            ITranslationService translationService)
         {
             _context = context;
             _ITouristService = ITouristService;
             _IPlaceService = IPlaceService;
+            _translationService = translationService;
 
         }
 
         public bool RatePlace(RatePlaceDto ratePlaceDto)
         {
-            int placeId = _IPlaceService.GetPlaceIdByPlaceName(ratePlaceDto.placeName);
+            // Retrieve the tourist's preferred language
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == ratePlaceDto.touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Translate the place name to English for processing if the preferred language is not English
+            string placeNameToSearch = ratePlaceDto.placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(ratePlaceDto.placeName, "en");
+            }
+
+            int placeId = _IPlaceService.GetPlaceIdByPlaceName(placeNameToSearch);
             var touristId = _ITouristService.GetUserIdByUsername(ratePlaceDto.touristName);
 
             if (placeId <= 0 || touristId == null)
@@ -60,40 +76,97 @@ namespace Guide_Me.Services
             return true;
         }
 
-        public int GetOverAllRateOfPlace(string placeName)
+
+        public int GetOverAllRateOfPlace(string placeName, string touristName)
         {
-            int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeName);
-            List<Rating> rating = _context.Rating.Where(p => p.PlaceId == placeID).ToList();
+            // Retrieve the tourist's preferred language
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Translate the place name to English for processing if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
+            }
+
+            // Get the place ID using the translated place name
+            int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeNameToSearch);
+            if (placeID <= 0)
+            {
+                return 0; // Return 0 if place not found
+            }
+
+            // Retrieve ratings for the place
+            List<Rating> ratings = _context.Rating.Where(p => p.PlaceId == placeID).ToList();
             int sumOfRating = 0, overallRating = 0;
 
-
-            foreach (Rating rate in rating)
+            // Calculate the sum of ratings
+            foreach (Rating rate in ratings)
             {
                 sumOfRating += rate.Rate;
             }
 
-            if (rating.Count > 0)
+            // Calculate the overall rating
+            if (ratings.Count > 0)
             {
-                overallRating = sumOfRating / rating.Count;
+                overallRating = sumOfRating / ratings.Count;
             }
 
             return overallRating;
         }
-        public List<string> GetSuggestionsBasedOnRating(int ratenum)
+
+        public List<string> GetSuggestionsBasedOnRating(int ratenum, string touristName)
         {
-            foreach (var suggest in suggestions)
+            // Retrieve the tourist's preferred language
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; // Default to English if tourist is null
+
+            // Initialize a list to store translated suggestions
+            List<string> translatedSuggestions = new List<string>();
+
+            // Check if the rating number exists in the suggestions dictionary
+            if (suggestions.TryGetValue(ratenum, out List<string> suggestionList))
             {
-                if(suggest.Key==ratenum)
+                foreach (var suggestion in suggestionList)
                 {
-                    return suggest.Value;
+                    // Translate each suggestion based on the tourist's preferred language
+                    string translatedSuggestion = suggestion;
+                    if (preferredLanguage != "en")
+                    {
+                        translatedSuggestion = _translationService.TranslateTextResultASync(suggestion, preferredLanguage);
+                    }
+                    translatedSuggestions.Add(translatedSuggestion);
                 }
+                return translatedSuggestions;
             }
-            return ["Not Found Suggestion For that Rate number"];
+
+            // If the rating number does not exist in the dictionary, return a default message
+            string defaultMessage = "Not Found Suggestion For that Rate number";
+            if (preferredLanguage != "en")
+            {
+                defaultMessage = _translationService.TranslateTextResultASync(defaultMessage, preferredLanguage);
+            }
+            return new List<string> { defaultMessage };
         }
+
         public int GetLatestRateOfToursit(string TouristName , string PlaceName)
         {
+
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == TouristName);
+
+            var preferredLanguage = tourist.Language;
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = PlaceName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(PlaceName, "en");
+            }
+
             string touristID = _ITouristService.GetUserIdByUsername(TouristName);
-            int placeID = _IPlaceService.GetPlaceIdByPlaceName(PlaceName);
+            int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeNameToSearch);
+
             if (placeID > 0 && touristID != null)
             {
                 Rating rate = _context.Rating
@@ -111,8 +184,23 @@ namespace Guide_Me.Services
 
         public bool AddSuggestionChoosen(RatePlaceWithSuggDto ratingDto)
         {
+            // Retrieve the tourist's details
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == ratingDto.touristName);
+            if (tourist == null)
+            {
+                return false; // Tourist not found
+            }
+
+            var preferredLanguage = tourist.Language;
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = ratingDto.placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(ratingDto.placeName, "en");
+            }
             string touristID = _ITouristService.GetUserIdByUsername(ratingDto.touristName);
-            int placeID = _IPlaceService.GetPlaceIdByPlaceName(ratingDto.placeName);
+            int placeID = _IPlaceService.GetPlaceIdByPlaceName(placeNameToSearch);
 
             if (placeID > 0 && touristID != null)
             {
