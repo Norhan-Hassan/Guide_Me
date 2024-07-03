@@ -181,11 +181,12 @@ namespace Guide_Me.Services
             if (place != null)
             {
                 var placeMedia = _context.placeMedias
-                    .Where(pm => pm.PlaceId == place.Id)
+                    .Where(pm => pm.PlaceId == place.Id &&( pm.MediaType == "image" || pm.MediaType=="text" || pm.MediaType=="video"))
                     .ToList();
 
                 foreach (var media in placeMedia)
                 {
+                    
                     var mediaDto = new PlaceMediaDto
                     {
                         MediaType = media.MediaType
@@ -195,7 +196,8 @@ namespace Guide_Me.Services
                     {
                         mediaDto.MediaContent = _blobStorageService.GetBlobUrlmedia(media.MediaContent);
                     }
-                    else
+                   
+                    else if(media.MediaType == "text")
                     {
                         mediaDto.MediaContent = media.MediaContent;
                     }
