@@ -191,7 +191,7 @@ namespace Guide_Me.Services
                         MediaType = media.MediaType
                     };
 
-                    if (media.MediaType == "image" || media.MediaType == "video" || media.MediaType == "audio")
+                    if (media.MediaType == "image" || media.MediaType == "video")// || media.MediaType == "audio")
                     {
                         mediaDto.MediaContent = _blobStorageService.GetBlobUrlmedia(media.MediaContent);
                     }
