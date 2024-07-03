@@ -26,75 +26,85 @@ namespace Guide_Me.Services
             _translationService = translationService;
         }
 
-        public bool AddReviewOnPlace(ReviewPlaceDto reviewPlaceDto)
+        public  bool AddReviewOnPlace(ReviewPlaceDto reviewPlaceDto)
         {
-            var placeId = _placeService.GetPlaceIdByPlaceName(reviewPlaceDto.placeName);
-            var touristId = _touristService.GetUserIdByUsername(reviewPlaceDto.touristName);
 
-            if (placeId > 0 && touristId != null)
-            {
-                var tourist = _touristService.GetTouristByUsername(reviewPlaceDto.touristName);
-                var targetLanguage = tourist.Language;
-                string translatedComment = reviewPlaceDto.comment;
-
-                if (targetLanguage != "en")
-                {
-                    translatedComment = _translationService.TranslateTextResultASync(reviewPlaceDto.comment, "en");
-                }
-
-                _context.Reviews.Add(new Review
-                {
-                    TouristId = touristId,
-                    placeId = placeId,
-                    Comment = translatedComment,
-                });
-                _context.SaveChanges();
-                return true;
-            }
-            else
+            var tourist =  _touristService.GetTouristByUsername(reviewPlaceDto.touristName);
+            if (tourist == null)
             {
                 return false;
             }
+
+            var targetLanguage = tourist.Language;
+            string translatedPlaceName = reviewPlaceDto.placeName;
+
+            if (targetLanguage != "en")
+            {
+                translatedPlaceName =  _translationService.TranslateTextResultASync(reviewPlaceDto.placeName, "en");
+            }
+
+            // Get placeId using translated placeName
+            var placeId = _placeService.GetPlaceIdByPlaceName(translatedPlaceName);
+            if (placeId <= 0)
+            {
+                return false;
+            }
+
+            _context.Reviews.Add(new Review
+            {
+                TouristId = tourist.Id,
+                placeId = placeId,
+                Comment= reviewPlaceDto.comment
+            });
+
+             _context.SaveChangesAsync();
+            return true;
         }
 
         public List<TouristReviewDto> GetReviewOnPlace(string placeName, string touristName)
         {
-            int placeID = _placeService.GetPlaceIdByPlaceName(placeName);
-            if (placeID <= 0)
-            {
-                return null;
-            }
-
-            var tourist = _touristService.GetTouristByUsername(touristName);
+            var tourist =  _touristService.GetTouristByUsername(touristName);
             if (tourist == null)
             {
                 return null;
             }
 
             var targetLanguage = tourist.Language;
+            string translatedPlaceName = placeName;
 
-            // Fetch all reviews for the place in a single query and then process them
-            var reviews = _context.Reviews.Where(r => r.placeId == placeID).ToList();
+            if (targetLanguage != "en")
+            {
+                translatedPlaceName =  _translationService.TranslateTextResultASync(placeName, "en");
+            }
+
+            // Get placeId using translated placeName
+            int placeId = _placeService.GetPlaceIdByPlaceName(translatedPlaceName);
+            if (placeId <= 0)
+            {
+                return null;
+            }
+
+            // Fetch all reviews for the place
+            var reviews = _context.Reviews.Where(r => r.placeId == placeId).ToList();
 
             List<TouristReviewDto> result = new List<TouristReviewDto>();
 
             foreach (var review in reviews)
             {
-                string commentToUse = review.Comment;
-
-                // Translate comment to the tourist's preferred language if not already in that language
-                if (targetLanguage != "en")
+               
+                // Construct PhotoUrl if available
+                var userPhotoUrl = _touristService.GetUserPhotoByUserId(review.TouristId);
+                string photoUrl = null;
+                if (!string.IsNullOrEmpty(userPhotoUrl))
                 {
-                    commentToUse = _translationService.TranslateTextResultASync(review.Comment, targetLanguage);
+                    photoUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(userPhotoUrl)}";
                 }
 
                 result.Add(new TouristReviewDto
                 {
-                    comment = commentToUse,
-                    touristName = _touristService.GetUserNameByUserId(review.TouristId),
-                    PhotoUrl = string.IsNullOrEmpty(_touristService.GetUserPhotoByUserId(review.TouristId))
-                                ? null
-                                : $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(_touristService.GetUserPhotoByUserId(review.TouristId))}"
+                    comment = review.Comment,
+                    touristName = touristName, 
+                    PhotoUrl = photoUrl
                 });
             }
 
