@@ -1,5 +1,5 @@
-﻿using Guide_Me.DTO;
-using Guide_Me.Models;
+﻿using Guide_Me.Models;
+using Guide_Me.DTO;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -13,13 +13,21 @@ namespace Guide_Me.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITouristService _ITouristService;
         private readonly IPlaceService _IPlaceService;
-
-        public HistoryService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ITouristService ITouristService, IPlaceService IPlaceService)
+        private readonly ITranslationService _translationService;
+        private readonly IBlobStorageService _blobStorageService;
+        public HistoryService(ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            ITouristService ITouristService, 
+            IPlaceService IPlaceService,
+            ITranslationService translationsService,
+            IBlobStorageService blobStorageService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _ITouristService = ITouristService;
             _IPlaceService = IPlaceService;
+            _translationService = translationsService;
+            _blobStorageService = blobStorageService;
         }
 
         public void UpdatePlaceHistory(string placeName, string touristName, DateTime date)
@@ -30,7 +38,17 @@ namespace Guide_Me.Services
                 throw new ArgumentException("Tourist not found", nameof(touristName));
             }
 
-            var placeId = _IPlaceService.GetPlaceIdByPlaceName(placeName);
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en"; 
+
+            // Translate the place name to English if the preferred language is not English
+            string placeNameToSearch = placeName;
+            if (preferredLanguage != "en")
+            {
+                placeNameToSearch = _translationService.TranslateTextResultASync(placeName, "en");
+            }
+
+            var placeId = _IPlaceService.GetPlaceIdByPlaceName(placeNameToSearch);
             if (placeId == 0)
             {
                 throw new ArgumentException("Place not found", nameof(placeName));
@@ -47,34 +65,40 @@ namespace Guide_Me.Services
             _context.SaveChanges();
         }
 
-        public List<TouristHistoryDto> GetTouristHistory(string Touristname)
+        public List<TouristHistoryDto> GetTouristHistory(string touristName)
         {
-            var touristId = _ITouristService.GetUserIdByUsername(Touristname);
+            var touristId = _ITouristService.GetUserIdByUsername(touristName);
 
             if (string.IsNullOrEmpty(touristId))
             {
-
                 return new List<TouristHistoryDto>();
             }
 
+            // Retrieve tourist's preferred language
+            var tourist = _context.Tourist.FirstOrDefault(t => t.UserName == touristName);
+            var preferredLanguage = tourist?.Language ?? "en";
+
             var userHistory = (from h in _context.histories
-                               join p in _context.Places on h.PlaceId equals p.Id
-                               join pm in _context.placeMedias on p.Id equals pm.PlaceId
                                where h.TouristId == touristId
+                               join p in _context.Places on h.PlaceId equals p.Id
+                               let imageMedia = _context.placeMedias
+                                                .Where(pm => pm.PlaceId == p.Id && pm.MediaType.ToLower() == "image")
+                                                .FirstOrDefault()
+                               where imageMedia != null
                                select new TouristHistoryDto
                                {
                                    Place = new PlaceDto
                                    {
-                                       Name = p.PlaceName,
-                                       Category = p.Category,
-                                       Media = pm != null ? new List<PlaceMediaDto>
-                               {
-                                   new PlaceMediaDto
-                                   {
-                                       MediaType = pm.MediaType,
-                                       MediaContent = pm.MediaType.ToLower() == "text" ? pm.MediaContent : GetMediaUrl(pm.MediaContent, _httpContextAccessor.HttpContext)
-                                   }
-                               } : new List<PlaceMediaDto>()
+                                       Name = preferredLanguage == "en" ? p.PlaceName : _translationService.TranslateTextResultASync(p.PlaceName, preferredLanguage),
+                                       Category = preferredLanguage == "en" ? p.Category : _translationService.TranslateTextResultASync(p.Category, preferredLanguage),
+                                       Media = new List<PlaceMediaDto>
+                                       {
+                                           new PlaceMediaDto
+                                           {
+                                               MediaType = imageMedia.MediaType,
+                                               MediaContent = _blobStorageService.GetBlobUrlmedia(imageMedia.MediaContent)
+                                           }
+                                       }
                                    },
                                    Date = h.Date
                                }).ToList();
@@ -82,12 +106,13 @@ namespace Guide_Me.Services
             return userHistory;
         }
 
-        private static string GetMediaUrl(string mediaContent, HttpContext httpContext)
-        {
-            var request = httpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            return $"{baseUrl}/{mediaContent}";
-        }
+
+
+
+
+
+
+
 
         public void UpdatePlaceHistory(int placeId, string Touristname, DateTime date)
         {
