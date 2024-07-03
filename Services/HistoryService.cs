@@ -87,7 +87,7 @@ namespace Guide_Me.Services
                                where imageMedia != null
                                select new TouristHistoryDto
                                {
-                                   Place = new PlaceDto
+                                   Place = new PlacehistoryDto
                                    {
                                        Name = preferredLanguage == "en" ? p.PlaceName : _translationService.TranslateTextResultASync(p.PlaceName, preferredLanguage),
                                        Category = preferredLanguage == "en" ? p.Category : _translationService.TranslateTextResultASync(p.Category, preferredLanguage),

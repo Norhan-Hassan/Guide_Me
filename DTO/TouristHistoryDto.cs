@@ -2,7 +2,7 @@
 {
     public class TouristHistoryDto
     {
-        public PlaceDto Place { get; set; }
+        public PlacehistoryDto  Place { get; set; }
         public DateTime Date { get; set; }
     }
 }
