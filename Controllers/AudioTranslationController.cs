@@ -54,51 +54,68 @@ namespace AudioTranslation.Controllers
 
                 string targetLanguage = _context.Tourist
                                                 .Where(t => t.Id == touristID)
-                                                .FirstOrDefault()?.Language;
+                                                .Select(t => t.Language)
+                                                .FirstOrDefault();
+
+                // Translate the place name to English if the target language is not English
+                string translatedPlaceName = placeName;
+                if (targetLanguage != "en")
+                {
+                    var translationResponse = await _translationService.TranslateTextAsync(placeName, "en");
+                    if (translationResponse == null)
+                    {
+                        _logger.LogError($"Error during place name translation: {placeName}");
+                        return StatusCode(500, "Place name translation error.");
+                    }
+
+                    // Extract translated text from the response
+                    translatedPlaceName = ExtractTranslatedText(translationResponse);
+                }
 
                 var place = await _context.Places.Include(p => p.PlaceMedias)
-                                                 .FirstOrDefaultAsync(p => p.PlaceName == placeName);
+                                                 .FirstOrDefaultAsync(p => p.PlaceName == translatedPlaceName);
                 if (place == null)
                 {
-                    return NotFound($"Place with name {placeName} not found");
+                    return NotFound($"Place with name {translatedPlaceName} not found");
                 }
 
                 var originalAudio = place.PlaceMedias.FirstOrDefault(m => m.MediaType == "audio");
                 if (originalAudio == null)
                 {
-                    return NotFound($"Original audio for place {placeName} not found");
+                    return NotFound($"Original audio for place {translatedPlaceName} not found");
                 }
-
-                var audioBlobUrl = _blobStorageService.GetBlobUrlmedia(originalAudio.MediaContent);
-                var localAudioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", originalAudio.MediaContent);
-
-                // Ensure the directory exists
-                var directory = Path.GetDirectoryName(localAudioFilePath);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                // Download the audio file from Blob Storage
-                await _blobStorageService.DownloadBlobAsync(originalAudio.MediaContent, localAudioFilePath);
-
-                // Transcribe the audio file
-                string transcriptionResult = await _audioTranscriptionService.TranscribeAudioAsync(localAudioFilePath);
-                if (transcriptionResult.StartsWith("Error"))
-                {
-                    _logger.LogError($"Error during transcription: {transcriptionResult}");
-                    return StatusCode(500, transcriptionResult);
-                }
-
-                string transcribedText = ExtractRawText(transcriptionResult);
 
                 string audioPath;
                 if (targetLanguage == "en")
                 {
-                    audioPath = localAudioFilePath;
+                    // Directly use the blob URL for English audio
+                    audioPath = _blobStorageService.GetBlobUrlmedia(originalAudio.MediaContent);
+                    return Ok(new { path = audioPath });
                 }
                 else
                 {
+                    var localAudioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", originalAudio.MediaContent);
+
+                    // Ensure the directory exists
+                    var directory = Path.GetDirectoryName(localAudioFilePath);
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    // Download the audio file from Blob Storage
+                    await _blobStorageService.DownloadBlobAsync(originalAudio.MediaContent, localAudioFilePath);
+
+                    // Transcribe the audio file
+                    string transcriptionResult = await _audioTranscriptionService.TranscribeAudioAsync(localAudioFilePath);
+                    if (transcriptionResult.StartsWith("Error"))
+                    {
+                        _logger.LogError($"Error during transcription: {transcriptionResult}");
+                        return StatusCode(500, transcriptionResult);
+                    }
+
+                    string transcribedText = ExtractRawText(transcriptionResult);
+
                     // Translate the transcribed text
                     string translationResult = await _translationService.TranslateTextAsync(transcribedText, targetLanguage);
                     if (translationResult == null)
@@ -111,18 +128,11 @@ namespace AudioTranslation.Controllers
 
                     // Convert the translated text to speech
                     audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
-                }
-
-                var translatedAudioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioPath);
-                if (System.IO.File.Exists(translatedAudioPath))
-                {
-                    var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                    var fullUrl = $"{baseUrl}/{audioPath.Replace("\\", "/")}";
 
                     // Delete the original file and its directory after the translated audio is processed
-                    if (System.IO.File.Exists(localAudioFilePath))
+                    try
                     {
-                        try
+                        if (System.IO.File.Exists(localAudioFilePath))
                         {
                             System.IO.File.Delete(localAudioFilePath);
                             _logger.LogInformation($"Deleted original file: {localAudioFilePath}");
@@ -154,20 +164,18 @@ namespace AudioTranslation.Controllers
                                 }
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"Error deleting file or folder: {localAudioFilePath}");
-                            // Optionally handle the error (e.g., log it, return a warning, etc.)
-                        }
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error deleting file or folder: {localAudioFilePath}");
+                        // Optionally handle the error (e.g., log it, return a warning, etc.)
+                    }
+                }
 
-                    return Ok(new { path = fullUrl });
-                }
-                else
-                {
-                    _logger.LogError($"File not found: {translatedAudioPath}");
-                    return NotFound();
-                }
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var fullUrl = $"{baseUrl}/{audioPath.Replace("\\", "/")}";
+
+                return Ok(new { path = fullUrl });
             }
             catch (Exception ex)
             {
@@ -175,10 +183,6 @@ namespace AudioTranslation.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
-
-
-
 
 
         private string ExtractRawText(string transcriptionResult)
