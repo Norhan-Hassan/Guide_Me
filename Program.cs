@@ -48,6 +48,7 @@ namespace Guide_Me
             builder.Services.AddScoped<IReviewsService, ReviewsService>();
             builder. Services.AddScoped<ISuggestionplacebyuserService, SuggestionplacebyuserService>();
             builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+            builder.Services.AddScoped<IScanService, ScanService>();
             builder.Services.Configure<AzureSpeechSettings>(builder.Configuration.GetSection("AzureSpeech"));
             builder.Services.Configure<TranslatorTextSettings>(builder.Configuration.GetSection("TranslatorText"));
             builder.Services.Configure<TextToSpeechSettings>(builder.Configuration.GetSection("AzureSpeech"));
@@ -91,7 +92,7 @@ namespace Guide_Me
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
                 };
             });
-
+            builder.Services.AddHttpClient();
             //Authentication in swagger
             builder.Services.AddSwaggerGen(opt =>
             {
