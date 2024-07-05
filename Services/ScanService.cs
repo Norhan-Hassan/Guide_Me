@@ -10,6 +10,7 @@ namespace Guide_Me.Services
     using Guide_Me.DTO;
     using Guide_Me.Models;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
 
     public class ScanService : IScanService
@@ -18,10 +19,14 @@ namespace Guide_Me.Services
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
         private readonly IPlaceService _placeService;
-
+        private readonly IBlobStorageService _blobStorageService;
         private readonly string _flaskBaseUrl;
 
-        public ScanService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ApplicationDbContext context, IPlaceService placeService)
+        public ScanService(IHttpClientFactory httpClientFactory, 
+            IConfiguration configuration,
+            ApplicationDbContext context,
+            IPlaceService placeService,
+            IBlobStorageService blobStorageService)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
@@ -30,6 +35,7 @@ namespace Guide_Me.Services
 
             // Retrieve base URL from appsettings.json
             _flaskBaseUrl = _configuration["Flask:BaseUrl"];
+            _blobStorageService = blobStorageService;
         }
 
         public async Task<ScannedImageResultDto> GetSimilarPlacesAsync(IFormFile image, string cityName)
@@ -124,11 +130,11 @@ namespace Guide_Me.Services
                 var place = _context.Places.FirstOrDefault(p => p.PlaceName == similarPlaceName);
                 if (place != null)
                 {
-                    var media = _context.placeMedias.FirstOrDefault(p => p.PlaceId == place.Id && p.MediaType == "image");
+                    var media = await _context.placeMedias.FirstOrDefaultAsync(p => p.PlaceId == place.Id && p.MediaType.ToLower() == "image");
                     var similarPlaceDto = new SimilarPlaceDataDto
                     {
                         PlaceName = place.PlaceName,
-                        Image = media != null ? _placeService.GetMediaUrl(media.MediaContent) : null
+                        Image = _blobStorageService.GetBlobUrlmedia(media.MediaContent)
                     };
                     result.Add(similarPlaceDto);
                 }
@@ -146,11 +152,11 @@ namespace Guide_Me.Services
             var item = _context.placeItem.FirstOrDefault(i => i.placeItemName == similarItemName);
             if (item != null)
             {
-                var media = _context.placeItemMedias.FirstOrDefault(i => i.placeItemID == item.ID && i.MediaType == "audio");
+                var media = await _context.placeItemMedias.FirstOrDefaultAsync(i => i.placeItemID == item.ID && i.MediaType == "audio");
                 var similarItemDto = new SimilarItemDataDto
                 {
                     ItemName = item.placeItemName,
-                    Image = media != null ? _placeService.GetMediaUrl(media.MediaContent) : null
+                    Image =  _blobStorageService.GetBlobUrlmedia(media.MediaContent)
                 };
                 return await Task.FromResult(similarItemDto);
             }
