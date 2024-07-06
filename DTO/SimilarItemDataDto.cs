@@ -3,6 +3,6 @@
     public class SimilarItemDataDto
     {
         public string ItemName { get; set; }
-        public string Image { get; set; }   
+        public string Audio { get; set; }   
     }
 }

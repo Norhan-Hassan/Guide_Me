@@ -156,7 +156,7 @@ namespace Guide_Me.Services
                 var similarItemDto = new SimilarItemDataDto
                 {
                     ItemName = item.placeItemName,
-                    Image =  _blobStorageService.GetBlobUrlmedia(media.MediaContent)
+                    Audio =  _blobStorageService.GetBlobUrlmedia(media.MediaContent)
                 };
                 return await Task.FromResult(similarItemDto);
             }
