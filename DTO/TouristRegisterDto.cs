@@ -13,6 +13,8 @@ namespace Guide_Me.DTO
         [Compare("password")]
         public string ConfirmPassword { get; set; }
         [Required]
+        [EmailAddress]
+        [RegularExpression(@"^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$")]
         public string email { get; set; }
         [Required]
         public string language { get; set; }

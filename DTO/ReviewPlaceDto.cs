@@ -8,7 +8,8 @@ namespace Guide_Me.DTO
         public string placeName { get; set; }
         [Required(ErrorMessage = "Tourist Name is required")]
         public string touristName { get; set; }
-        [Required(ErrorMessage = "Rating Number is required")]
+
+        [Required(ErrorMessage = "Comment is required")]
         public string comment{ get; set; }
     }
 }

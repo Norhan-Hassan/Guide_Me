@@ -99,11 +99,11 @@ namespace Guide_Me.Services
                 {
                     photoUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/uploads/photos/{Path.GetFileName(userPhotoUrl)}";
                 }
-
+                
                 result.Add(new TouristReviewDto
                 {
                     comment = review.Comment,
-                    touristName = touristName, 
+                    touristName = review.Tourist.UserName, 
                     PhotoUrl = photoUrl
                 });
             }
