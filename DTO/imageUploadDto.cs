@@ -4,7 +4,7 @@
     {
        
             public IFormFile Image { get; set; }
-            public string CityName { get; set; }
+            public string Name { get; set; }
         }
     
 }

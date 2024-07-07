@@ -22,12 +22,12 @@ public class ScanController : ControllerBase
             return BadRequest("No file uploaded.");
         }
 
-        if (string.IsNullOrEmpty(imageUploadDto.CityName))
+        if (string.IsNullOrEmpty(imageUploadDto.Name))
         {
             return BadRequest("City name is required.");
         }
 
-        var similarPlaces = await _scanService.GetSimilarPlacesAsync(imageUploadDto.Image, imageUploadDto.CityName);
+        var similarPlaces = await _scanService.GetSimilarPlacesAsync(imageUploadDto.Image, imageUploadDto.Name);
         return Ok(similarPlaces);
     }
     [HttpPost("scan-item")]
