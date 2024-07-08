@@ -94,7 +94,7 @@ namespace AudioTranslation.Controllers
                 }
                 else
                 {
-                    var localAudioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", originalAudio.MediaContent);
+                    var localAudioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "audios", originalAudio.MediaContent);
 
                     // Ensure the directory exists
                     var directory = Path.GetDirectoryName(localAudioFilePath);
@@ -128,6 +128,14 @@ namespace AudioTranslation.Controllers
 
                     // Convert the translated text to speech
                     audioPath = await _textToSpeechService.SynthesizeSpeechAsync(translatedText, targetLanguage);
+
+                    // Upload the translated audio file to Blob Storage
+                    string blobUrl = await UploadTranslatedAudioToBlob(audioPath, targetLanguage);
+                    if (blobUrl == null)
+                    {
+                        _logger.LogError("Error uploading translated audio to Blob Storage");
+                        return StatusCode(500, "Error uploading translated audio to Blob Storage");
+                    }
 
                     // Delete the original file and its directory after the translated audio is processed
                     try
@@ -170,17 +178,39 @@ namespace AudioTranslation.Controllers
                         _logger.LogError(ex, $"Error deleting file or folder: {localAudioFilePath}");
                         // Optionally handle the error (e.g., log it, return a warning, etc.)
                     }
+
+                    return Ok(new { path = blobUrl });
                 }
-
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
-                var fullUrl = $"{baseUrl}/{audioPath.Replace("\\", "/")}";
-
-                return Ok(new { path = fullUrl });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing audio translation.");
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        private async Task<string> UploadTranslatedAudioToBlob(string filePath, string targetLanguage)
+        {
+            try
+            {
+                // Specify your container name
+                string containerName = "firstcontainer";
+
+                // Example: Construct the correct file path for the translated audio in wwwroot
+                string translatedAudioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "audios", Path.GetFileName(filePath));
+
+                using (var stream = new FileStream(translatedAudioFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    string blobName = Path.GetFileName(translatedAudioFilePath); // Adjust as necessary
+                    string blobUrl = await _blobStorageService.UploadBlobAsync(containerName, blobName, stream, "audio/mp3");
+                    _logger.LogInformation($"Translated audio file uploaded to: {blobUrl}");
+                    return blobUrl;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error uploading translated audio file to Blob Storage: {ex.Message}");
+                return null;
             }
         }
 

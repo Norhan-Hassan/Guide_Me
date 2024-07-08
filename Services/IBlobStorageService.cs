@@ -7,5 +7,6 @@ namespace Guide_Me.Services
         string GetBlobUrl(string containerName, string blobName);
         string GetBlobUrlmedia(string MediaContent);
         Task DownloadBlobAsync(string blobName, string downloadFilePath);
+        Task<string> UploadBlobAsync(string containerName, string blobName, Stream content, string contentType);
     }
 }

@@ -17,20 +17,21 @@ namespace Guide_Me.Services
         private readonly AzureSpeechSettings _azureSpeechSettings;
         private readonly ILogger<AudioTranscriptionService> _logger;
         private readonly IPlaceService _placeService;
-
+        private readonly IBlobStorageService _blobStorageService;
 
         public AudioTranscriptionService(
             ApplicationDbContext context,
             IOptions<AzureSpeechSettings> azureSpeechSettings,
             ILogger<AudioTranscriptionService> logger,
-            IPlaceService placeService)
+            IPlaceService placeService,
+            IBlobStorageService blobStorageService)
         {
             _context = context;
             _azureSpeechSettings = azureSpeechSettings.Value;
             _logger = logger;
             _placeService = placeService;
+            _blobStorageService = blobStorageService;
         }
-
 
         public async Task<string> TranscribeAudioAsync(string audioFilePath)
         {
@@ -68,7 +69,7 @@ namespace Guide_Me.Services
 
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    return $"Recognized: {result.Text}";
+                    return result.Text;
                 }
                 else if (result.Reason == ResultReason.NoMatch)
                 {
@@ -133,20 +134,60 @@ namespace Guide_Me.Services
             var audioFile = await _context.placeMedias
                        .Where(m => m.PlaceId == placeID && m.MediaType == "audio").FirstOrDefaultAsync();
 
-            //var audioFile = await _context.audios.FindAsync(audioId);
-
             if (audioFile == null)
             {
                 return $"Audio file of place {placeName} not found.";
             }
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", audioFile.MediaContent);
-            string result = await TranscribeAudioAsync(filePath);
-            Console.WriteLine(result);
+            string localFilePath = Path.Combine(Path.GetTempPath(), audioFile.MediaContent);
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(localFilePath));
+
+            // Download the file from blob storage to a temporary location
+            await _blobStorageService.DownloadBlobAsync(audioFile.MediaContent, localFilePath);
+
+            // Transcribe the downloaded file
+            string result = await TranscribeAudioAsync(localFilePath);
+
+            // Optionally, delete the local file after transcription
+            if (File.Exists(localFilePath))
+            {
+                File.Delete(localFilePath);
+            }
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                // Save the transcribed text as an audio file locally
+                string transcribedAudioFilePath = Path.Combine(Path.GetTempPath(), $"{Path.GetFileNameWithoutExtension(audioFile.MediaContent)}-transcribed.wav");
+                SaveTranscriptionAsAudio(result, transcribedAudioFilePath);
+
+                // Upload the transcribed audio file to blob storage
+                using (var stream = new FileStream(transcribedAudioFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    string blobUrl = await _blobStorageService.UploadBlobAsync("firstcontainer", Path.GetFileName(transcribedAudioFilePath), stream, "audio/mp3");
+                    Console.WriteLine($"Transcribed audio file uploaded to: {blobUrl}");
+
+                    // Optionally, delete the local transcribed audio file after uploading
+                    if (File.Exists(transcribedAudioFilePath))
+                    {
+                        File.Delete(transcribedAudioFilePath);
+                    }
+
+                    return blobUrl;
+                }
+            }
 
             return result;
         }
 
+        private void SaveTranscriptionAsAudio(string transcription, string filePath)
+        {
+            var config = SpeechConfig.FromSubscription(_azureSpeechSettings.SubscriptionKey, _azureSpeechSettings.Region);
+            var synthesizer = new SpeechSynthesizer(config);
 
+            using var stream = AudioConfig.FromWavFileOutput(filePath);
+            synthesizer.SpeakTextAsync(transcription).Wait();
+        }
     }
 }
