@@ -43,7 +43,7 @@ namespace Guide_Me.Services
             {
                 var placeItems = _context.placeItem
                     .Include(pi => pi.PlaceItemMedias)
-                    .Where(pi => pi.ID == place.Id)
+                    .Where(pi => pi.placeID == place.Id)
                     .ToList();
 
                 foreach (var placeItem in placeItems)
@@ -57,7 +57,6 @@ namespace Guide_Me.Services
 
                     var placeItemDto = new PlaceItemDto
                     {
-                        ID = placeItem.ID,
                         placeItemName = placeItemNameToUse,
                         Media = placeItem.PlaceItemMedias != null ?
                             placeItem.PlaceItemMedias.Select(media =>

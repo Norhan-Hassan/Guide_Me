@@ -320,6 +320,57 @@ namespace Guide_Me.Services
             return result;
         }
 
+        //private async Task<SimilarItemDataDto> GetSimilarItemFromDbAsync(string similarItemName)
+        //{
+        //    if (string.IsNullOrEmpty(similarItemName))
+        //    {
+        //        Console.WriteLine("The similar item name is null or empty.");
+        //        return null;
+        //    }
+
+        //    var normalizedItemName = NormalizeString(similarItemName);
+        //    Console.WriteLine($"Normalized item name: {normalizedItemName}");
+
+        //    // Fetch all items from the database once
+        //    var allItems = await _context.placeItem.ToListAsync();
+        //    Console.WriteLine($"Total items fetched: {allItems.Count}");
+
+        //    foreach (var item in allItems)
+        //    {
+        //        var normalizedDbItemName = NormalizeString(item.placeItemName);
+        //        Console.WriteLine($"Normalized database item name: {normalizedDbItemName}");
+
+        //        if (normalizedDbItemName == normalizedItemName)
+        //        {
+        //            Console.WriteLine($"Match found: {item.placeItemName}");
+
+        //            // Retrieve related media for the matched item
+        //            //var media = await _context.placeItemMedias
+        //            //    .FirstOrDefaultAsync(m => m.placeItemID == item.ID && m.MediaType.ToLower() == "audio");
+        //           
+        //            if (media != null)
+        //            {
+        //                Console.WriteLine($"Media found for item {item.placeItemName}: {media.MediaContent}");
+        //            }
+        //            else
+        //            {
+        //                Console.WriteLine($"No media found for item {item.placeItemName}");
+        //            }
+
+        //            var similarItemDto = new SimilarItemDataDto
+        //            {
+        //                ItemName = item.placeItemName,
+        //                Audio = media != null ? _blobStorageService.GetBlobUrlmedia(media.MediaContent) : null
+        //            };
+
+        //            return similarItemDto;
+        //        }
+        //    }
+
+        //    Console.WriteLine("No matching item found in the database.");
+        //    return null;
+        //}
+
         private async Task<SimilarItemDataDto> GetSimilarItemFromDbAsync(string similarItemName)
         {
             if (string.IsNullOrEmpty(similarItemName))
@@ -332,7 +383,7 @@ namespace Guide_Me.Services
             Console.WriteLine($"Normalized item name: {normalizedItemName}");
 
             // Fetch all items from the database once
-            var allItems = await _context.placeItem.ToListAsync();
+            var allItems = await _context.placeItem.Include(pi => pi.PlaceItemMedias).ToListAsync();
             Console.WriteLine($"Total items fetched: {allItems.Count}");
 
             foreach (var item in allItems)
@@ -345,9 +396,8 @@ namespace Guide_Me.Services
                     Console.WriteLine($"Match found: {item.placeItemName}");
 
                     // Retrieve related media for the matched item
-                    var media = await _context.placeItemMedias
-                        .FirstOrDefaultAsync(m => m.placeItemID == item.ID && m.MediaType.ToLower() == "audio");
-
+                    var media = item.PlaceItemMedias
+                        .FirstOrDefault(m => m.MediaType.ToLower() == "audio");
                     if (media != null)
                     {
                         Console.WriteLine($"Media found for item {item.placeItemName}: {media.MediaContent}");
@@ -370,7 +420,6 @@ namespace Guide_Me.Services
             Console.WriteLine("No matching item found in the database.");
             return null;
         }
-
 
 
         private string NormalizeString(string input)
